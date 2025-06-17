@@ -1,52 +1,183 @@
-name: Backend CI
+name: Backend CI/CD Pipeline
 
 on:
   push:
     paths:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
+      - 'shared/**'  # Include shared dependencies
   pull_request:
     paths:
       - 'backend/**'
+      - 'shared/**'
+
+env:
+  NODE_VERSION: 18
+  PG_HOST: localhost
+  PG_PORT: 5432
+  PG_DATABASE: test_db
+  REDIS_URL: redis://localhost:6379
 
 jobs:
-  test:
+  lint-and-test:
+    name: Lint & Test
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./backend
         
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: --entrypoint redis-server
+
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
       with:
-        node-version: 18
-    - run: npm ci
-    - run: npm run build
-    - run: npm test
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Install Dependencies
+      run: npm ci --prefer-offline
       
-  deploy:
-    needs: test
+    - name: Run Linter
+      run: npm run lint
+      
+    - name: Run Type Check
+      run: npm run typecheck
+      
+    - name: Run Unit Tests
+      run: npm run test:unit
+      env:
+        NODE_ENV: test
+        JWT_SECRET: test_secret
+        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+        
+    - name: Run Integration Tests
+      run: npm run test:integration
+      
+    - name: Upload Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        directory: ./coverage
+        fail_ci_if_error: false
+
+  build-and-deploy:
+    name: Build & Deploy
+    needs: lint-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release/*'
+    
+    strategy:
+      matrix:
+        environment: ['staging', 'production']
+        include:
+          - environment: 'staging'
+            railway_env: 'staging'
+            required_approval: false
+          - environment: 'production'
+            railway_env: 'production'
+            required_approval: true
     
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
       with:
-        node-version: 18
+        node-version: ${{ env.NODE_VERSION }}
         
-    - name: Install Railway CLI
-      run: npm install -g @railway/cli
+    - name: Install Dependencies
+      working-directory: ./backend
+      run: npm ci --production
+      
+    - name: Build Application
+      working-directory: ./backend
+      run: npm run build
       
     - name: Login to Railway
-      run: railway login --ci
-      env:
-        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      if: !matrix.required_approval || (matrix.required_approval && github.event_name == 'push')
+      uses: railwayapp/cli-action@v1.0.0
+      with:
+        token: ${{ secrets.RAILWAY_TOKEN }}
         
     - name: Deploy to Railway
+      if: !matrix.required_approval || (matrix.required_approval && github.event_name == 'push')
       working-directory: ./backend
-      run: railway up --service=earnmax-backend --detach
+      run: |
+        railway switch ${{ secrets.RAILWAY_PROJECT_ID }}
+        railway environment switch ${{ matrix.railway_env }}
+        railway up --service=earnmax-backend --detach
       env:
         RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
-        RAILWAY_ENVIRONMENT: ${{ secrets.RAILWAY_ENVIRONMENT }}
+        RAILWAY_ENVIRONMENT_ID: ${{ secrets[format('RAILWAY_{0}_ENV_ID', matrix.environment)] }}
+        
+    - name: Run Database Migrations
+      if: !matrix.required_approval || (matrix.required_approval && github.event_name == 'push')
+      working-directory: ./backend
+      run: |
+        railway run -- npm run migrate:up
+      env:
+        DATABASE_URL: ${{ secrets[format('{0}_DATABASE_URL', matrix.environment)] }}
+        
+    - name: Notify Deployment
+      if: always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `🚀 Backend deployed to ${'${{ matrix.environment }}'} environment!`
+          })
+
+  security-scan:
+    name: Security Scan
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: Install Dependencies
+      working-directory: ./backend
+      run: npm ci
+      
+    - name: Run Dependency Audit
+      working-directory: ./backend
+      run: npm audit --production
+      
+    - name: Run Snyk Security Scan
+      uses: snyk/actions/node@master
+      continue-on-error: true
+      with:
+        command: monitor
+        args: --all-projects --detection-depth=6
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
