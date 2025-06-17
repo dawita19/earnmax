@@ -1,0 +1,84 @@
+// src/app/(user)/dashboard/components/QuickActions.tsx
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Icons } from '@/components/icons';
+
+interface QuickActionsProps {
+  onWithdraw: () => void;
+  onUpgrade: () => void;
+  onInvite: () => void;
+  onTaskStart: () => void;
+  vipLevel: number;
+}
+
+export const QuickActions: React.FC<QuickActionsProps> = ({
+  onWithdraw,
+  onUpgrade,
+  onInvite,
+  onTaskStart,
+  vipLevel,
+}) => {
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      <Button 
+        onClick={onWithdraw}
+        className="h-24 flex-col gap-2"
+        variant="outline"
+      >
+        <Icons.wallet className="h-6 w-6" />
+        <span>Withdraw</span>
+      </Button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button 
+            className="h-24 flex-col gap-2"
+            variant="outline"
+            disabled={vipLevel >= 8}
+          >
+            <Icons.trendingUp className="h-6 w-6" />
+            <span>Upgrade VIP</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          {Array.from({ length: 8 - vipLevel }, (_, i) => i + vipLevel + 1).map(level => (
+            <DropdownMenuItem 
+              key={level} 
+              onClick={() => onUpgrade(level)}
+              className="flex justify-between"
+            >
+              <span>VIP {level}</span>
+              <span className="text-muted-foreground text-xs">
+                {level * 1200} ETB
+              </span>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Button 
+        onClick={onInvite}
+        className="h-24 flex-col gap-2"
+        variant="outline"
+      >
+        <Icons.users className="h-6 w-6" />
+        <span>Invite Team</span>
+      </Button>
+
+      <Button 
+        onClick={onTaskStart}
+        className="h-24 flex-col gap-2"
+        variant="outline"
+      >
+        <Icons.tasks className="h-6 w-6" />
+        <span>Start Tasks</span>
+      </Button>
+    </div>
+  );
+};

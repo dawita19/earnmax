@@ -1,0 +1,39 @@
+// src/app/(error)/error.tsx
+'use client'
+
+import { useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  const router = useRouter()
+
+  useEffect(() => {
+    console.error(error)
+  }, [error])
+
+  return (
+    <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
+      <div className="space-y-2 text-center">
+        <h1 className="text-4xl font-bold tracking-tight text-destructive">
+          Something went wrong!
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          {error.message || 'An unexpected error occurred'}
+        </p>
+      </div>
+      <div className="flex gap-3">
+        <Button variant="outline" onClick={() => reset()}>
+          Try again
+        </Button>
+        <Button onClick={() => router.push('/')}>Return Home</Button>
+      </div>
+    </div>
+  )
+}

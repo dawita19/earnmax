@@ -1,0 +1,84 @@
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { User, UserStatus } from '@/lib/definitions';
+import { fetchFilteredUsers } from '@/lib/data/admin';
+import Pagination from '@/components/Pagination';
+import VIPBadge from './VIPBadge';
+import StatusDropdown from './StatusDropdown';
+
+export default async function UserTable({
+  query,
+  currentPage,
+  vipLevel,
+}: {
+  query: string;
+  currentPage: number;
+  vipLevel: string;
+}) {
+  const { users, totalPages } = await fetchFilteredUsers(query, currentPage, vipLevel);
+
+  return (
+    <>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>User ID</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>VIP Level</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Balance</TableHead>
+              <TableHead>Invites</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.map((user: User) => (
+              <TableRow key={user.user_id}>
+                <TableCell className="font-medium">{user.user_id}</TableCell>
+                <TableCell>
+                  <Link 
+                    href={`/admin/users/${user.user_id}`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    {user.full_name}
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  <VIPBadge level={user.vip_level} />
+                </TableCell>
+                <TableCell>
+                  <StatusDropdown 
+                    userId={user.user_id} 
+                    currentStatus={user.account_status as UserStatus}
+                  />
+                </TableCell>
+                <TableCell>${user.balance.toFixed(2)}</TableCell>
+                <TableCell>{user.total_invites}</TableCell>
+                <TableCell>
+                  <div className="flex space-x-2">
+                    <Link
+                      href={`/admin/users/${user.user_id}`}
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      View
+                    </Link>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <Pagination totalPages={totalPages} />
+    </>
+  );
+}

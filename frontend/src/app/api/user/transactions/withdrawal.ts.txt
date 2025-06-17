@@ -1,0 +1,82 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { checkWithdrawalLimits } from '@/lib/utils/withdrawal-limits';
+
+export async function POST(req: Request) {
+  const session = await getServerSession();
+  const { amount, paymentMethod, paymentDetails } = await req.json();
+
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: {
+      userId: true,
+      fullName: true,
+      vipLevel: true,
+      balance: true,
+      totalWithdrawn: true,
+    },
+  });
+
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  const limitCheck = await checkWithdrawalLimits(
+    user.userId,
+    user.vipLevel,
+    amount,
+    user.totalWithdrawn
+  );
+
+  if (!limitCheck.allowed) {
+    return NextResponse.json(
+      { error: limitCheck.message, requiresUpgrade: limitCheck.requiresUpgrade },
+      { status: 400 }
+    );
+  }
+
+  if (amount > user.balance) {
+    return NextResponse.json(
+      { error: 'Insufficient balance' },
+      { status: 400 }
+    );
+  }
+
+  try {
+    // Create withdrawal request
+    const request = await prisma.withdrawalRequest.create({
+      data: {
+        userId: user.userId,
+        fullName: user.fullName,
+        amount,
+        paymentMethod,
+        paymentDetails,
+        status: 'pending',
+      },
+    });
+
+    // Reserve funds
+    await prisma.user.update({
+      where: { userId: user.userId },
+      data: {
+        balance: { decrement: amount },
+        reservedBalance: { increment: amount },
+      },
+    });
+
+    return NextResponse.json({
+      message: 'Withdrawal request submitted',
+      requestId: request.requestId,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to process withdrawal' },
+      { status: 500 }
+    );
+  }
+}

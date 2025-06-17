@@ -1,0 +1,128 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyToken } from '@/lib/jwt';
+import { Admin, User } from '@/models';
+import { connectDB } from '@/config/db';
+import rateLimit from './rate-limit';
+
+// Initialize rate limiter for auth endpoints
+const authLimiter = rateLimit({
+  interval: 60 * 1000, // 1 minute
+  uniqueTokenPerInterval: 500, 
+});
+
+export const adminAuth = async (req: NextRequest) => {
+  await connectDB();
+  
+  // Apply rate limiting first
+  const rateLimitRes = await authLimiter.check(req, 10, 'AUTH_RATE_LIMIT');
+  if (rateLimitRes.status === 429) {
+    return rateLimitRes;
+  }
+
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return NextResponse.json(
+      { error: 'Unauthorized - Invalid token format' },
+      { status: 401 }
+    );
+  }
+
+  const token = authHeader.split(' ')[1];
+  
+  try {
+    const decoded = verifyToken(token);
+    
+    // Verify admin status
+    const admin = await Admin.findById(decoded.id).select('-password');
+    if (!admin) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Admin access only' },
+        { status: 403 }
+      );
+    }
+
+    // Check admin level if needed
+    if (decoded.admin_level !== 'high' && req.nextUrl.pathname.startsWith('/api/high-admin')) {
+      return NextResponse.json(
+        { error: 'Forbidden - Insufficient privileges' },
+        { status: 403 }
+      );
+    }
+
+    // Attach admin to request
+    const headers = new Headers(req.headers);
+    headers.set('x-admin-id', admin._id.toString());
+    headers.set('x-admin-level', admin.admin_level);
+
+    return NextResponse.next({
+      request: {
+        headers
+      }
+    });
+    
+  } catch (err) {
+    return NextResponse.json(
+      { error: 'Unauthorized - Invalid token' },
+      { status: 401 }
+    );
+  }
+};
+
+export const userAuth = async (req: NextRequest) => {
+  await connectDB();
+  
+  const rateLimitRes = await authLimiter.check(req, 20, 'USER_AUTH_LIMIT');
+  if (rateLimitRes.status === 429) {
+    return rateLimitRes;
+  }
+
+  const token = req.cookies.get('earnmax_token')?.value;
+  
+  if (!token) {
+    return NextResponse.json(
+      { error: 'Unauthorized - No token provided' },
+      { status: 401 }
+    );
+  }
+
+  try {
+    const decoded = verifyToken(token);
+    
+    // Verify user exists
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized - User not found' },
+        { status: 401 }
+      );
+    }
+
+    // Check account status
+    if (user.account_status !== 'active') {
+      return NextResponse.json(
+        { 
+          error: 'Account restricted',
+          reason: user.suspension_reason || 'Contact support'
+        },
+        { status: 403 }
+      );
+    }
+
+    // Attach user to request
+    const headers = new Headers(req.headers);
+    headers.set('x-user-id', user._id.toString());
+    headers.set('x-vip-level', user.vip_level.toString());
+
+    return NextResponse.next({
+      request: {
+        headers
+      }
+    });
+    
+  } catch (err) {
+    return NextResponse.json(
+      { error: 'Unauthorized - Invalid token' },
+      { status: 401 }
+    );
+  }
+};

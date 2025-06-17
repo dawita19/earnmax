@@ -1,0 +1,33 @@
+import { InviteLinkCard } from './components/InviteLinkCard';
+import { ReferralStats } from './components/ReferralStats';
+import { NetworkTree } from './components/NetworkTree';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'My Team',
+  description: 'Manage your referral network and team statistics',
+};
+
+export default function TeamPage() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex-1">
+          <InviteLinkCard />
+        </div>
+        <div className="flex-1">
+          <ReferralStats />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold tracking-tight">Network Tree</h2>
+        <p className="text-muted-foreground">
+          View your downline network and their details
+        </p>
+      </div>
+
+      <NetworkTree />
+    </div>
+  );
+}

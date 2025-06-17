@@ -1,0 +1,55 @@
+import prisma from '@/lib/prisma';
+import { UserWithRelations } from '@/types';
+
+interface GetUsersParams {
+  page: number;
+  limit: number;
+  vipLevel?: string;
+}
+
+export async function getUsers({ page, limit, vipLevel }: GetUsersParams): Promise<{
+  users: UserWithRelations[];
+  total: number;
+}> {
+  const skip = (page - 1) * limit;
+  
+  const where = vipLevel ? { vipLevel: parseInt(vipLevel) } : {};
+  
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      skip,
+      take: limit,
+      include: {
+        referrals: true,
+        transactions: true
+      },
+      orderBy: { joinDate: 'desc' }
+    }),
+    prisma.user.count({ where })
+  ]);
+  
+  return { users, total };
+}
+
+export async function suspendUser(userId: string, reason: string) {
+  return await prisma.$transaction(async (tx) => {
+    // Update user status
+    const user = await tx.user.update({
+      where: { id: userId },
+      data: { accountStatus: 'suspended' }
+    });
+    
+    // Create suspension record
+    await tx.suspension.create({
+      data: {
+        userId,
+        reason,
+        status: 'active',
+        startDate: new Date()
+      }
+    });
+    
+    return user;
+  });
+}

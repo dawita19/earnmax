@@ -1,0 +1,118 @@
+'use client';
+
+import { UpgradeRequest } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import { format } from 'date-fns';
+import Image from 'next/image';
+import { approveUpgrade, rejectUpgrade } from '@/actions/upgrades';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+
+interface UpgradeDetailProps {
+  request: UpgradeRequest;
+  open: boolean;
+  onClose: () => void;
+}
+
+export function UpgradeDetail({ request, open, onClose }: UpgradeDetailProps) {
+  const router = useRouter();
+
+  const handleApprove = async () => {
+    try {
+      await approveUpgrade(request.id);
+      toast.success('Upgrade approved');
+      router.refresh();
+      onClose();
+    } catch (error) {
+      toast.error('Failed to approve upgrade');
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      await rejectUpgrade(request.id);
+      toast.success('Upgrade rejected');
+      router.refresh();
+      onClose();
+    } catch (error) {
+      toast.error('Failed to reject upgrade');
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Upgrade Request Details</DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">User</p>
+              <p>{request.user.fullName}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Request Date</p>
+              <p>{format(new Date(request.createdAt), 'MMM dd, yyyy HH:mm')}</p>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Current VIP</p>
+              <p>Level {request.currentVipLevel}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">New VIP</p>
+              <p>Level {request.newVipLevel}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Upgrade Amount</p>
+              <p>{request.upgradeAmount.toLocaleString()} ETB</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Recharge Amount</p>
+              <p>{request.rechargeAmount.toLocaleString()} ETB</p>
+            </div>
+          </div>
+
+          {request.paymentProofUrl && (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Payment Proof</p>
+              <div className="relative aspect-video overflow-hidden rounded-md">
+                <Image
+                  src={request.paymentProofUrl}
+                  alt="Payment proof"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </div>
+          )}
+
+          <Separator />
+
+          <div className="flex justify-end gap-2">
+            <Button variant="destructive" onClick={handleReject}>
+              Reject
+            </Button>
+            <Button onClick={handleApprove}>Approve</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

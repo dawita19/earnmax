@@ -1,0 +1,90 @@
+// app/(auth)/login/form.tsx
+'use client';
+
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { loginSchema } from '@/validations/auth';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/use-toast';
+import { signIn } from 'next-auth/react';
+
+type FormData = z.infer<typeof loginSchema>;
+
+export default function LoginForm() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const form = useForm<FormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      credential: '',
+      password: '',
+    },
+  });
+
+  async function onSubmit(data: FormData) {
+    try {
+      const result = await signIn('credentials', {
+        redirect: false,
+        credential: data.credential,
+        password: data.password,
+      });
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      router.push('/dashboard');
+    } catch (error) {
+      toast({
+        title: 'Login Failed',
+        description: error instanceof Error ? error.message : 'Invalid credentials',
+        variant: 'destructive',
+      });
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="credential"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email or Phone</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter your email or phone" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Enter your password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex justify-end">
+          <Link href="/forgot-password" className="text-sm text-primary underline">
+            Forgot password?
+          </Link>
+        </div>
+        <Button type="submit" className="w-full" loading={form.formState.isSubmitting}>
+          Sign In
+        </Button>
+      </form>
+    </Form>
+  );
+}

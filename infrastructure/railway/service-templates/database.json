@@ -1,0 +1,26 @@
+{
+  "name": "earnmax-db",
+  "type": "postgresql",
+  "plan": "small",
+  "version": "14",
+  "resources": {
+    "cpu": 1,
+    "memory": 1024,
+    "disk": 10240
+  },
+  "configuration": {
+    "extensions": [
+      "pgcrypto",
+      "uuid-ossp"
+    ],
+    "parameters": {
+      "max_connections": "100",
+      "shared_buffers": "256MB"
+    }
+  },
+  "backups": {
+    "enabled": true,
+    "schedule": "0 0 * * *",
+    "retention": 7
+  }
+}

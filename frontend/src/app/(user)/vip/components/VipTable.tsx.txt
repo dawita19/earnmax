@@ -1,0 +1,63 @@
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { useUser } from '@/contexts/user-context';
+import { VIP_LEVELS } from '@/lib/constants';
+
+interface VipTableProps {
+  onPurchase: (level: number) => void;
+  onUpgrade: (level: number) => void;
+}
+
+export const VipTable: React.FC<VipTableProps> = ({ onPurchase, onUpgrade }) => {
+  const { user } = useUser();
+
+  return (
+    <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">VIP Level</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Investment</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Daily Earning</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Min Withdrawal</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Max Withdrawal</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200 bg-white">
+          {VIP_LEVELS.map((level) => (
+            <tr key={level.level} className={user?.vip_level === level.level ? 'bg-blue-50' : ''}>
+              <td className="whitespace-nowrap px-6 py-4">
+                <span className="font-medium">Level {level.level}</span>
+                {user?.vip_level === level.level && (
+                  <span className="ml-2 rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">Current</span>
+                )}
+              </td>
+              <td className="whitespace-nowrap px-6 py-4">{level.investmentAmount.toLocaleString()} Birr</td>
+              <td className="whitespace-nowrap px-6 py-4">{level.dailyEarning.toLocaleString()} Birr</td>
+              <td className="whitespace-nowrap px-6 py-4">{level.minWithdrawal.toLocaleString()} Birr</td>
+              <td className="whitespace-nowrap px-6 py-4">{level.maxTotalWithdrawal.toLocaleString()} Birr</td>
+              <td className="whitespace-nowrap px-6 py-4">
+                {user?.vip_level === undefined || user.vip_level < level.level ? (
+                  <Button
+                    variant={user?.vip_level === undefined ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => 
+                      user?.vip_level === undefined 
+                        ? onPurchase(level.level) 
+                        : onUpgrade(level.level)
+                    }
+                  >
+                    {user?.vip_level === undefined ? 'Purchase' : 'Upgrade'}
+                  </Button>
+                ) : (
+                  <span className="text-gray-500">Owned</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};

@@ -1,0 +1,25 @@
+import { getLoansByUserId } from '@/lib/api/loans';
+import { DataTable } from '@/components/ui/data-table';
+import { columns } from './loan-columns';
+import { Loan } from '@/types';
+
+interface LoanTableProps {
+  userId: string;
+}
+
+export async function LoanTable({ userId }: LoanTableProps) {
+  const loans = await getLoansByUserId(userId);
+  
+  return (
+    <div className="rounded-md border bg-card">
+      <div className="p-4 border-b">
+        <h2 className="text-lg font-semibold">Loan History</h2>
+      </div>
+      <DataTable
+        columns={columns}
+        data={loans}
+        emptyMessage="No loans found"
+      />
+    </div>
+  );
+}

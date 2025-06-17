@@ -1,0 +1,30 @@
+{
+  "build": {
+    "builder": "nixpacks",
+    "config": {
+      "startCommand": "npm run start:prod"
+    }
+  },
+  "deploy": {
+    "startCommand": "node dist/main.js",
+    "restartPolicyType": "ALWAYS"
+  },
+  "env": {
+    "DATABASE_URL": {
+      "description": "PostgreSQL connection URL",
+      "required": true
+    },
+    "REDIS_URL": {
+      "description": "Redis connection URL",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "Secret for JWT token generation",
+      "generator": "secret"
+    },
+    "ADMIN_PANEL_PASSWORD": {
+      "description": "Password for high-level admin access",
+      "required": true
+    }
+  }
+}

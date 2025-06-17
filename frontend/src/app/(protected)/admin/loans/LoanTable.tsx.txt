@@ -1,0 +1,123 @@
+// app/(protected)/admin/system/loans/LoanTable.tsx
+'use client';
+
+import { ColumnDef } from '@tanstack/react-table';
+import { DataTable } from '@/components/ui/data-table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { MoreHorizontal } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+type Loan = {
+  id: string;
+  userId: string;
+  userName: string;
+  originalAmount: number;
+  currentBalance: number;
+  totalProfit: number;
+  status: 'active' | 'paid' | 'defaulted';
+  createdAt: string;
+};
+
+const columns: ColumnDef<Loan>[] = [
+  {
+    accessorKey: 'userId',
+    header: 'User ID',
+  },
+  {
+    accessorKey: 'userName',
+    header: 'Name',
+  },
+  {
+    accessorKey: 'originalAmount',
+    header: 'Principal',
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue('originalAmount'));
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(amount);
+    },
+  },
+  {
+    accessorKey: 'currentBalance',
+    header: 'Balance',
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue('currentBalance'));
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(amount);
+    },
+  },
+  {
+    accessorKey: 'totalProfit',
+    header: 'Profit',
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue('totalProfit'));
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(amount);
+    },
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({ row }) => {
+      const status = row.getValue('status') as string;
+      return (
+        <Badge
+          variant={
+            status === 'active'
+              ? 'default'
+              : status === 'paid'
+              ? 'success'
+              : 'destructive'
+          }
+        >
+          {status}
+        </Badge>
+      );
+    },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => {
+      const loan = row.original;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(loan.userId)}
+            >
+              Copy User ID
+            </DropdownMenuItem>
+            <DropdownMenuItem>View Details</DropdownMenuItem>
+            <DropdownMenuItem>Adjust Balance</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
+];
+
+export function LoansDataTable() {
+  // In a real app, you would fetch this data from your API
+  const data: Loan[] = [
+    // Sample data
+  ];
+
+  return <DataTable columns={columns} data={data} />;
+}

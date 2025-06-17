@@ -1,0 +1,16 @@
+// app/(protected)/admin/system/loans/page.tsx
+import { LoansDataTable } from '@/components/admin/LoansDataTable';
+import { AdminAuthGuard } from '@/lib/auth';
+
+export default function LoansPage() {
+  return (
+    <AdminAuthGuard level="high">
+      <div className="p-6">
+        <h1 className="text-3xl font-bold mb-6">User Loans Management</h1>
+        <div className="bg-white rounded-lg shadow p-4">
+          <LoansDataTable />
+        </div>
+      </div>
+    </AdminAuthGuard>
+  );
+}

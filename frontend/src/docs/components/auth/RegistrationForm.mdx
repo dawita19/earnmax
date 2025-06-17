@@ -1,0 +1,93 @@
+---
+title: User Registration
+description: VIP system signup with referral tracking
+---
+
+```jsx live
+const RegistrationForm = () => {
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phone: '',
+    email: '',
+    password: '',
+    inviteCode: '',
+    agreeTerms: false
+  });
+
+  const validateInviteCode = async (code) => {
+    const response = await API.get(`/invites/validate?code=${code}`);
+    return response.data.valid;
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await API.post('/users/register', {
+        ...formData,
+        ipAddress: getClientIP() // Anti-fraud measure
+      });
+      
+      if (response.data.success) {
+        trackRegistration({
+          ...formData,
+          inviterId: response.data.inviterId,
+          referralLevels: response.data.referralLevels
+        });
+        navigate('/welcome');
+      }
+    } catch (error) {
+      notifyError(error.response.data.message);
+    }
+  };
+
+  return (
+    <MultiStepForm currentStep={step}>
+      <Step title="Personal Information" number={1}>
+        <TextInput
+          label="Full Name"
+          value={formData.fullName}
+          onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+        />
+        <PhoneInput
+          value={formData.phone}
+          onChange={(phone) => setFormData({...formData, phone})}
+          validate={validatePhoneNumber}
+        />
+      </Step>
+
+      <Step title="Account Security" number={2}>
+        <PasswordStrength
+          value={formData.password}
+          onChange={(password) => setFormData({...formData, password})}
+        />
+      </Step>
+
+      <Step title="Referral Network" number={3}>
+        <InviteCodeInput
+          value={formData.inviteCode}
+          onChange={(code) => setFormData({...formData, inviteCode: code})}
+          validator={validateInviteCode}
+        />
+        {formData.inviteCode && (
+          <ReferralNetworkPreview 
+            code={formData.inviteCode}
+            levels={4}
+          />
+        )}
+      </Step>
+
+      <Step title="Complete Registration" number={4}>
+        <TermsCheckbox
+          checked={formData.agreeTerms}
+          onChange={(e) => setFormData({...formData, agreeTerms: e.target.checked})}
+        />
+        <Button 
+          onClick={handleSubmit}
+          disabled={!formData.agreeTerms}
+        >
+          Complete Registration
+        </Button>
+      </Step>
+    </MultiStepForm>
+  );
+};

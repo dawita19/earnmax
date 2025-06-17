@@ -1,0 +1,56 @@
+---
+title: Request Approval System
+description: Round-robin distributed request processing interface
+---
+
+```jsx live
+const RequestApproval = ({ requestType }) => {
+  const [requests, setRequests] = useState([]);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+
+  // Fetch requests assigned to current admin
+  useEffect(() => {
+    API.get(`/requests/${requestType}?adminId=${auth.currentAdmin.id}`)
+      .then(res => setRequests(res.data));
+  }, [requestType]);
+
+  const handleApprove = (requestId) => {
+    API.post(`/requests/approve/${requestId}`, {
+      adminId: auth.currentAdmin.id,
+      action: 'approve'
+    }).then(() => {
+      setRequests(requests.filter(req => req.id !== requestId));
+      notifySuccess('Request approved successfully');
+    });
+  };
+
+  return (
+    <div className="approval-system">
+      <RequestTabs 
+        types={['purchase', 'upgrade', 'withdrawal']}
+        activeTab={requestType}
+      />
+      
+      <div className="request-list">
+        {requests.map(request => (
+          <RequestCard 
+            key={request.id}
+            request={request}
+            onSelect={setSelectedRequest}
+            onApprove={handleApprove}
+            onReject={() => handleReject(request.id)}
+          />
+        ))}
+      </div>
+
+      {selectedRequest && (
+        <RequestDetailModal
+          request={selectedRequest}
+          onClose={() => setSelectedRequest(null)}
+          // OCR integration for payment proof verification
+          ocrEnabled={requestType !== 'withdrawal'}
+        />
+      )}
+    </div>
+  );
+};

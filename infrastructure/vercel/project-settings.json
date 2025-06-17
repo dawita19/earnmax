@@ -1,0 +1,12 @@
+{
+  "framework": "nextjs",
+  "installCommand": "yarn install",
+  "buildCommand": "yarn build",
+  "outputDirectory": "build",
+  "nodeVersion": "18.x",
+  "autoExposeSystemEnvs": true,
+  "gitLFS": false,
+  "environmentVariables": {
+    "NODE_ENV": "production"
+  }
+}

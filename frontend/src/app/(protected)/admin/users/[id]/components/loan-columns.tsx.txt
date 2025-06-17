@@ -1,0 +1,61 @@
+'use client';
+
+import { ColumnDef } from '@tanstack/react-table';
+import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+import { Loan } from '@/types';
+
+export const columns: ColumnDef<Loan>[] = [
+  {
+    accessorKey: 'created_at',
+    header: 'Date',
+    cell: ({ row }) => format(new Date(row.getValue('created_at')), 'PP'),
+  },
+  {
+    accessorKey: 'original_amount',
+    header: 'Amount',
+    cell: ({ row }) => (
+      <span className="font-medium">
+        {Number(row.getValue('original_amount')).toLocaleString()} ETB
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'current_balance',
+    header: 'Remaining',
+    cell: ({ row }) => (
+      <span className="font-medium">
+        {Number(row.getValue('current_balance')).toLocaleString()} ETB
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'total_profit',
+    header: 'Profit',
+    cell: ({ row }) => (
+      <span className="text-green-600">
+        +{Number(row.getValue('total_profit')).toLocaleString()} ETB
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({ row }) => {
+      const status = row.getValue('status') as string;
+      return (
+        <Badge
+          variant={
+            status === 'active'
+              ? 'success'
+              : status === 'defaulted'
+              ? 'destructive'
+              : 'secondary'
+          }
+        >
+          {status}
+        </Badge>
+      );
+    },
+  },
+];

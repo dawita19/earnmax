@@ -1,0 +1,34 @@
+import { getUpgradeRequests } from '@/lib/api/upgrades';
+import UpgradeRequestDetail from './UpgradeDetail';
+import { UpgradeStatus } from '@prisma/client';
+import { DataTable } from './_components/DataTable';
+import { columns } from './_components/columns';
+
+export default async function UpgradeRequestsPage({
+  searchParams,
+}: {
+  searchParams: { status?: UpgradeStatus; page?: string };
+}) {
+  const status = searchParams.status || 'PENDING';
+  const page = Number(searchParams.page) || 1;
+  
+  const { requests, total } = await getUpgradeRequests({
+    status,
+    page,
+    limit: 10,
+  });
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold">Upgrade Requests</h1>
+      
+      <DataTable 
+        columns={columns} 
+        data={requests} 
+        total={total}
+        currentPage={page}
+        status={status}
+      />
+    </div>
+  );
+}

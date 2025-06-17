@@ -1,0 +1,8 @@
+POST https://api.earnmaxelite.com/admin/v1/withdrawals/12345/approve
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6MTIzLCJsZXZlbCI6ImxvdyJ9.abc123
+Content-Type: application/json
+
+{
+  "admin_notes": "Payment processed via CBE",
+  "processed_amount": 2500.00
+}

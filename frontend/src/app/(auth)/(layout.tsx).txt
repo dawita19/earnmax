@@ -1,0 +1,35 @@
+// src/app/(auth)/layout.tsx
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './auth.css'
+
+const inter = Inter({ subsets: ['latin'] })
+
+export const metadata: Metadata = {
+  title: 'EarnMax Elite - Authentication',
+  description: 'Login to access your EarnMax Elite account',
+}
+
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body className={`${inter.className} bg-gray-50`}>
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="w-full max-w-md">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-indigo-600">EarnMax Elite</h1>
+              <p className="mt-2 text-gray-600">
+                Maximize your earnings with our VIP investment platform
+              </p>
+            </div>
+            {children}
+          </div>
+        </div>
+      </body>
+    </html>
+  )
+}

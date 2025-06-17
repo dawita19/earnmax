@@ -1,0 +1,120 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, Paper, LinearProgress, useTheme } from '@mui/material';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { io, Socket } from 'socket.io-client';
+
+interface StatUpdate {
+  timestamp: string;
+  totalRevenue: number;
+  activeUsers: number;
+  withdrawalsProcessed: number;
+}
+
+export const RealtimeStats: React.FC = () => {
+  const [stats, setStats] = useState<StatUpdate[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const theme = useTheme();
+
+  useEffect(() => {
+    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001', {
+      path: '/admin-socket',
+      transports: ['websocket'],
+      auth: {
+        token: localStorage.getItem('adminToken'),
+      },
+    });
+
+    setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      setIsConnected(true);
+      console.log('Connected to WebSocket');
+    });
+
+    newSocket.on('disconnect', () => {
+      setIsConnected(false);
+    });
+
+    newSocket.on('statsUpdate', (data: StatUpdate) => {
+      setStats((prev) => {
+        const newStats = [...prev, data];
+        return newStats.slice(-10); // Keep last 10 updates
+      });
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
+
+  return (
+    <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h6" component="div">
+          Real-time Activity
+        </Typography>
+        <Box display="flex" alignItems="center">
+          <Box
+            sx={{
+              width: 10,
+              height: 10,
+              borderRadius: '50%',
+              bgcolor: isConnected ? 'success.main' : 'error.main',
+              mr: 1,
+            }}
+          />
+          <Typography variant="caption">
+            {isConnected ? 'Connected' : 'Disconnected'}
+          </Typography>
+        </Box>
+      </Box>
+
+      {stats.length === 0 ? (
+        <Box height={300} display="flex" alignItems="center" justifyContent="center">
+          <Typography>Waiting for data...</Typography>
+        </Box>
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={stats}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="timestamp" 
+              tickFormatter={(value) => new Date(value).toLocaleTimeString()} 
+            />
+            <YAxis yAxisId="left" orientation="left" />
+            <YAxis yAxisId="right" orientation="right" />
+            <Tooltip 
+              labelFormatter={(value) => `Time: ${new Date(value).toLocaleTimeString()}`}
+              formatter={(value, name) => {
+                if (name === 'totalRevenue') return [`$${Number(value).toLocaleString()}`, 'Revenue'];
+                return [value, name];
+              }}
+            />
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="activeUsers"
+              stroke={theme.palette.primary.main}
+              activeDot={{ r: 8 }}
+            />
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="totalRevenue"
+              stroke={theme.palette.secondary.main}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      )}
+
+      <Box mt={2}>
+        <Typography variant="caption" color="text.secondary">
+          Last update: {stats.length > 0 ? new Date(stats[stats.length - 1].timestamp).toLocaleString() : 'Never'}
+        </Typography>
+      </Box>
+    </Paper>
+  );
+};

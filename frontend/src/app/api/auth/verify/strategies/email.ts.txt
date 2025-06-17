@@ -1,0 +1,19 @@
+// src/app/api/auth/verify/strategies/email.ts
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function sendEmailOTP(email: string, otp: string) {
+  try {
+    await resend.emails.send({
+      from: 'verify@earnmaxelite.com',
+      to: email,
+      subject: 'Your EarnMax Elite Verification Code',
+      html: `<p>Your verification code is: <strong>${otp}</strong></p>`
+    });
+    return true;
+  } catch (error) {
+    console.error('Email sending error:', error);
+    throw new Error('Failed to send email');
+  }
+}

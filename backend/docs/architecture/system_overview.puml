@@ -1,0 +1,64 @@
+@startuml EarnMax_System_Overview
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam nodesep 50
+skinparam ranksep 50
+
+title EarnMax Elite System Overview
+
+package "EarnMax Elite" {
+  [Web Frontend] as frontend
+  [Mobile App] as mobile
+  [Admin Panel] as admin
+  
+  package "Backend Services" {
+    [API Gateway] as gateway
+    [User Service] as user_service
+    [VIP Service] as vip_service
+    [Transaction Service] as transaction
+    [Task Service] as task
+    [Referral Service] as referral
+    [Notification Service] as notification
+  }
+  
+  package "Data Layer" {
+    [PostgreSQL] as db
+    [Redis Cache] as redis
+    [Audit Logs] as audit
+  }
+  
+  package "External Services" {
+    [Payment Gateway] as payment
+    [SMS Gateway] as sms
+    [Email Service] as email
+  }
+}
+
+frontend --> gateway
+mobile --> gateway
+admin --> gateway
+
+gateway --> user_service
+gateway --> vip_service
+gateway --> transaction
+gateway --> task
+gateway --> referral
+
+user_service --> db
+vip_service --> db
+transaction --> db
+task --> db
+referral --> db
+
+notification --> redis
+notification --> sms
+notification --> email
+
+transaction --> payment
+
+user_service --> audit
+vip_service --> audit
+transaction --> audit
+
+@enduml

@@ -1,0 +1,100 @@
+import { useState } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { WithdrawForm } from './WithdrawForm';
+import { XIcon } from '@heroicons/react/outline';
+
+interface WithdrawModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const WithdrawModal = ({ isOpen, onClose }: WithdrawModalProps) => {
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleSuccess = () => {
+    setSuccessMessage('Withdrawal request submitted successfully!');
+    setTimeout(() => {
+      onClose();
+      setSuccessMessage('');
+    }, 2000);
+  };
+
+  const handleError = (message: string) => {
+    setErrorMessage(message);
+    setTimeout(() => setErrorMessage(''), 5000);
+  };
+
+  return (
+    <Transition appear show={isOpen} as="div">
+      <Dialog
+        as="div"
+        className="fixed inset-0 z-10 overflow-y-auto"
+        onClose={onClose}
+      >
+        <div className="min-h-screen px-4 text-center">
+          <Transition.Child
+            as="div"
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-30" />
+          </Transition.Child>
+
+          <span className="inline-block h-screen align-middle" aria-hidden="true">
+            &#8203;
+          </span>
+
+          <Transition.Child
+            as="div"
+            enter="ease-out duration-300"
+            enterFrom="opacity-0 scale-95"
+            enterTo="opacity-100 scale-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100 scale-100"
+            leaveTo="opacity-0 scale-95"
+          >
+            <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-lg">
+              <div className="flex justify-between items-center">
+                <Dialog.Title
+                  as="h3"
+                  className="text-lg font-medium leading-6 text-gray-900"
+                >
+                  Withdraw Funds
+                </Dialog.Title>
+                <button
+                  type="button"
+                  className="text-gray-400 hover:text-gray-500"
+                  onClick={onClose}
+                >
+                  <XIcon className="h-6 w-6" aria-hidden="true" />
+                </button>
+              </div>
+
+              {successMessage ? (
+                <div className="mt-4 p-4 bg-green-50 text-green-700 rounded-md">
+                  {successMessage}
+                </div>
+              ) : (
+                <>
+                  {errorMessage && (
+                    <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-md">
+                      {errorMessage}
+                    </div>
+                  )}
+                  <div className="mt-4">
+                    <WithdrawForm onSuccess={handleSuccess} onError={handleError} />
+                  </div>
+                </>
+              )}
+            </div>
+          </Transition.Child>
+        </div>
+      </Dialog>
+    </Transition>
+  );
+};

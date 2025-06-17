@@ -1,0 +1,44 @@
+import prisma from '@/lib/prisma';
+
+export async function getSystemStats() {
+  const [
+    totalUsers,
+    activeUsers,
+    suspendedUsers,
+    totalRevenue,
+    totalWithdrawals,
+    pendingWithdrawals,
+    pendingPurchases,
+    pendingUpgrades,
+    vipDistribution
+  ] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.count({ where: { accountStatus: 'active' }}),
+    prisma.user.count({ where: { accountStatus: 'suspended' }}),
+    prisma.systemStatistic.findUnique({ where: { statId: 1 }}).then(s => s?.totalRevenue || 0),
+    prisma.systemStatistic.findUnique({ where: { statId: 1 }}).then(s => s?.totalWithdrawals || 0),
+    prisma.withdrawalRequest.count({ where: { status: 'pending' }}),
+    prisma.purchaseRequest.count({ where: { status: 'pending' }}),
+    prisma.upgradeRequest.count({ where: { status: 'pending' }}),
+    prisma.user.groupBy({
+      by: ['vipLevel'],
+      _count: { _all: true },
+      orderBy: { vipLevel: 'asc' }
+    })
+  ]);
+
+  return {
+    totalUsers,
+    activeUsers,
+    suspendedUsers,
+    totalRevenue,
+    totalWithdrawals,
+    pendingWithdrawals,
+    pendingPurchases,
+    pendingUpgrades,
+    vipDistribution: vipDistribution.reduce((acc, curr) => {
+      acc[`vip${curr.vipLevel}`] = curr._count._all;
+      return acc;
+    }, {} as Record<string, number>)
+  };
+}

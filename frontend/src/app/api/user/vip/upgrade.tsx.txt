@@ -1,0 +1,76 @@
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/lib/axios';
+import { VipLevel } from '@/types';
+
+export const VipUpgradeForm = ({ currentLevel }: { currentLevel: number }) => {
+  const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
+  const [paymentProof, setPaymentProof] = useState<File | null>(null);
+  const queryClient = useQueryClient();
+
+  const { data: vipLevels } = useQuery({
+    queryKey: ['vip-levels'],
+    queryFn: async () => {
+      const response = await api.get('/vip/levels');
+      return response.data as VipLevel[];
+    },
+  });
+
+  const { mutate: upgradeVip, isLoading } = useMutation({
+    mutationFn: async () => {
+      if (!selectedLevel) return;
+      
+      const formData = new FormData();
+      formData.append('newLevel', selectedLevel.toString());
+      if (paymentProof) formData.append('paymentProof', paymentProof);
+      
+      const response = await api.post('/vip/upgrade', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['user']);
+      // Show success notification
+    },
+  });
+
+  const eligibleLevels = vipLevels?.filter(level => level.level_id > currentLevel);
+
+  return (
+    <div className="space-y-6">
+      <h3>Upgrade VIP Level</h3>
+      
+      <div className="grid grid-cols-3 gap-4">
+        {eligibleLevels?.map(level => (
+          <div 
+            key={level.level_id}
+            className={`vip-level-card ${selectedLevel === level.level_id ? 'selected' : ''}`}
+            onClick={() => setSelectedLevel(level.level_id)}
+          >
+            <h4>VIP {level.level_id}</h4>
+            <p>Investment: {level.investment_amount}</p>
+            <p>Daily: {level.daily_earning}</p>
+          </div>
+        ))}
+      </div>
+      
+      {selectedLevel && (
+        <>
+          <PaymentProofUploader 
+            onFileChange={setPaymentProof} 
+            required 
+          />
+          
+          <button
+            onClick={() => upgradeVip()}
+            disabled={!paymentProof || isLoading}
+            className="btn-primary"
+          >
+            {isLoading ? 'Processing...' : 'Submit Upgrade Request'}
+          </button>
+        </>
+      )}
+    </div>
+  );
+};

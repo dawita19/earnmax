@@ -1,0 +1,118 @@
+'use client';
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { updateSystemConfig } from '@/lib/api/admin';
+import { toast } from 'sonner';
+
+type ConfigFormData = {
+  min_withdrawal_vip0: number;
+  max_withdrawal_vip0: number;
+  referral_level1_percent: number;
+  referral_level2_percent: number;
+  referral_level3_percent: number;
+  referral_level4_percent: number;
+  weekly_bonus_thresholds: {
+    level1: number;
+    level2: number;
+    level3: number;
+    level4: number;
+  };
+};
+
+export function ConfigForm({ initialConfig }: { initialConfig: ConfigFormData }) {
+  const { register, handleSubmit, formState: { isSubmitting } } = useForm<ConfigFormData>({
+    defaultValues: initialConfig
+  });
+  const [isDirty, setIsDirty] = useState(false);
+
+  const onSubmit = async (data: ConfigFormData) => {
+    try {
+      await updateSystemConfig(data);
+      toast.success('Configuration updated successfully');
+      setIsDirty(false);
+    } catch (error) {
+      toast.error('Failed to update configuration');
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <form onSubmit={handleSubmit(onSubmit)} onChange={() => setIsDirty(true)}>
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-medium mb-4">VIP Level Settings</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  VIP0 Min Withdrawal
+                </label>
+                <input
+                  type="number"
+                  {...register('min_withdrawal_vip0', { valueAsNumber: true })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  VIP0 Max Withdrawal
+                </label>
+                <input
+                  type="number"
+                  {...register('max_withdrawal_vip0', { valueAsNumber: true })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-medium mb-4">Referral Bonuses</h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((level) => (
+                <div key={level}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Level {level} (%)
+                  </label>
+                  <input
+                    type="number"
+                    {...register(`referral_level${level}_percent` as const, { valueAsNumber: true })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-medium mb-4">Weekly Bonus Thresholds</h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((level) => (
+                <div key={level}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tier {level} (Invites)
+                  </label>
+                  <input
+                    type="number"
+                    {...register(`weekly_bonus_thresholds.level${level}` as const, { valueAsNumber: true })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <button
+            type="submit"
+            disabled={!isDirty || isSubmitting}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

@@ -1,0 +1,48 @@
+'use client';
+
+import { PaymentAccount } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
+type AccountTableProps = {
+  accounts: PaymentAccount[];
+};
+
+export function AccountTable({ accounts }: AccountTableProps) {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Account Name</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Account Number</TableHead>
+          <TableHead>Holder</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {accounts.map((account) => (
+          <TableRow key={account.id}>
+            <TableCell>{account.accountName}</TableCell>
+            <TableCell>
+              <span className="capitalize">{account.accountType.replace('_', ' ')}</span>
+            </TableCell>
+            <TableCell>{account.accountNumber}</TableCell>
+            <TableCell>{account.accountHolder}</TableCell>
+            <TableCell>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                asChild
+              >
+                <a href={`/protected/admin/system/payment-accounts/edit/${account.id}`}>
+                  Edit
+                </a>
+              </Button>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}

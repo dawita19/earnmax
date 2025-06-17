@@ -1,0 +1,2 @@
+GET https://api.earnmaxelite.com/admin/v1/audit-logs?action_type=withdrawal&admin_id=123
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6MTIzLCJsZXZlbCI6ImhpZ2gifQ.mno345

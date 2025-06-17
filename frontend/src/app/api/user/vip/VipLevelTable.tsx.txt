@@ -1,0 +1,84 @@
+import React from 'react';
+import { VIP_LEVELS } from '@/lib/constants/vip-levels';
+import { formatCurrency } from '@/lib/utils/format-currency';
+import { Button } from '../ui/button';
+import { useUser } from '@/hooks/useUser';
+
+interface VipLevelTableProps {
+  onPurchase: (level: number) => void;
+  onUpgrade: (level: number) => void;
+}
+
+export const VipLevelTable: React.FC<VipLevelTableProps> = ({
+  onPurchase,
+  onUpgrade,
+}) => {
+  const { user } = useUser();
+  const currentVipLevel = user?.vipLevel || 0;
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full bg-white rounded-lg overflow-hidden">
+        <thead className="bg-primary text-white">
+          <tr>
+            <th className="py-3 px-4">VIP Level</th>
+            <th className="py-3 px-4">Investment</th>
+            <th className="py-3 px-4">Daily Earning</th>
+            <th className="py-3 px-4">Per Task</th>
+            <th className="py-3 px-4">Min Withdrawal</th>
+            <th className="py-3 px-4">Max Withdrawal</th>
+            <th className="py-3 px-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200">
+          {VIP_LEVELS.map((level) => (
+            <tr
+              key={level.levelId}
+              className={currentVipLevel === level.levelId ? 'bg-blue-50' : ''}
+            >
+              <td className="py-3 px-4 text-center">{level.levelId}</td>
+              <td className="py-3 px-4 text-center">
+                {formatCurrency(level.investmentAmount)}
+              </td>
+              <td className="py-3 px-4 text-center">
+                {formatCurrency(level.dailyEarning)}
+              </td>
+              <td className="py-3 px-4 text-center">
+                {formatCurrency(level.perTaskEarning)}
+              </td>
+              <td className="py-3 px-4 text-center">
+                {formatCurrency(level.minWithdrawal)}
+              </td>
+              <td className="py-3 px-4 text-center">
+                {formatCurrency(level.maxTotalWithdrawal)}
+              </td>
+              <td className="py-3 px-4 text-center">
+                {currentVipLevel === 0 && level.levelId > 0 && (
+                  <Button
+                    onClick={() => onPurchase(level.levelId)}
+                    variant="success"
+                    size="sm"
+                  >
+                    Purchase
+                  </Button>
+                )}
+                {currentVipLevel > 0 && level.levelId > currentVipLevel && (
+                  <Button
+                    onClick={() => onUpgrade(level.levelId)}
+                    variant="warning"
+                    size="sm"
+                  >
+                    Upgrade
+                  </Button>
+                )}
+                {currentVipLevel > 0 && level.levelId <= currentVipLevel && (
+                  <span className="text-gray-500">Owned</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};

@@ -1,0 +1,106 @@
+openapi: 3.0.0
+info:
+  title: EarnMax Elite API
+  version: 1.0.0
+  description: |
+    Multi-level VIP Investment Platform API
+    Includes authentication, VIP management, transactions, and referral systems
+
+servers:
+  - url: https://api.earnmaxelite.com/v1
+    description: Production server
+  - url: http://localhost:3000/v1
+    description: Development server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    AdminKey:
+      type: apiKey
+      in: header
+      name: X-Admin-Key
+
+  schemas:
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          format: int64
+          example: 100001
+        full_name:
+          type: string
+          example: "John Doe"
+        vip_level:
+          type: integer
+          minimum: 0
+          maximum: 8
+        balance:
+          type: number
+          format: double
+          example: 1500.50
+      required:
+        - user_id
+        - full_name
+        - vip_level
+
+    VIPLevel:
+      type: object
+      properties:
+        level:
+          type: integer
+          example: 3
+        investment:
+          type: number
+          example: 6000.00
+        daily_earning:
+          type: number
+          example: 200.00
+
+paths:
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone_number:
+                  type: string
+                  example: "+251911223344"
+                invite_code:
+                  type: string
+                  example: "ABCD123"
+              required: [phone_number, invite_code]
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /admin/withdrawals:
+    get:
+      tags: [Admin]
+      security:
+        - AdminKey: []
+      summary: List withdrawal requests
+      parameters:
+        - $ref: '#/components/parameters/statusParam'
+      responses:
+        '200':
+          description: List of withdrawals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WithdrawalRequest'

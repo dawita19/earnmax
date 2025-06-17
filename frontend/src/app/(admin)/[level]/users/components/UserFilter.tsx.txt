@@ -1,0 +1,68 @@
+"use client"
+
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Search } from "lucide-react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useDebouncedCallback } from "use-debounce"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select"
+
+export function UserFilter() {
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+
+  const handleSearch = useDebouncedCallback((term: string) => {
+    const params = new URLSearchParams(searchParams)
+    if (term) {
+      params.set("query", term)
+    } else {
+      params.delete("query")
+    }
+    router.replace(`${pathname}?${params.toString()}`)
+  }, 300)
+
+  const handleVipFilter = (value: string) => {
+    const params = new URLSearchParams(searchParams)
+    if (value) {
+      params.set("vip_level", value)
+    } else {
+      params.delete("vip_level")
+    }
+    router.replace(`${pathname}?${params.toString()}`)
+  }
+
+  return (
+    <div className="flex items-center gap-4">
+      <div className="relative w-full max-w-md">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+        <Input
+          placeholder="Search users..."
+          className="pl-10"
+          defaultValue={searchParams.get("query")?.toString()}
+          onChange={(e) => handleSearch(e.target.value)}
+        />
+      </div>
+      <Select onValueChange={handleVipFilter} defaultValue={searchParams.get("vip_level")?.toString()}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="VIP Level" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Levels</SelectItem>
+          <SelectItem value="0">VIP 0 (Free)</SelectItem>
+          <SelectItem value="1">VIP 1</SelectItem>
+          <SelectItem value="2">VIP 2</SelectItem>
+          <SelectItem value="3">VIP 3</SelectItem>
+          <SelectItem value="4+">VIP 4+</SelectItem>
+        </SelectContent>
+      </Select>
+      <Button variant="outline">Export CSV</Button>
+    </div>
+  )
+}

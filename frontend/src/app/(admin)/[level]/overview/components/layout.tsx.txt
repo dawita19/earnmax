@@ -1,0 +1,34 @@
+import React from 'react';
+import { AdminNavbar } from '@/components/AdminNavbar';
+import { AdminSidebar } from '@/components/AdminSidebar';
+import { Box, CssBaseline, Toolbar } from '@mui/material';
+
+interface AdminLayoutProps {
+  children: React.ReactNode;
+  params: { level: string };
+}
+
+export default function AdminLayout({ children, params }: AdminLayoutProps) {
+  const adminLevel = params.level === 'high' ? 'High Level' : 'Low Level';
+
+  return (
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+      <AdminNavbar adminLevel={adminLevel} />
+      <AdminSidebar level={params.level} />
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+        }}
+      >
+        <Toolbar /> {/* For proper spacing below app bar */}
+        {children}
+      </Box>
+    </Box>
+  );
+}
+
+const drawerWidth = 240;

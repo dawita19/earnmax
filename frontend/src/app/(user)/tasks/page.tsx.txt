@@ -1,0 +1,47 @@
+import { TasksGrid } from './components/TasksGrid';
+import { getDailyTasks } from '@/lib/data/tasks';
+import { getCurrentUser } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { refreshUserEarnings } from '@/lib/actions/user.actions';
+import { DailyEarningsCard } from '@/components/cards/DailyEarningsCard';
+
+export default async function TasksPage() {
+  const user = await getCurrentUser();
+  
+  if (!user) {
+    redirect('/login');
+  }
+
+  const tasks = await getDailyTasks(user.id, user.vipLevel);
+
+  const handleTaskComplete = async (taskId: string, earnings: number) => {
+    'use server';
+    await refreshUserEarnings(user.id, earnings);
+    // Additional referral bonus logic would go here
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="lg:col-span-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Your Daily Tasks
+          </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Complete tasks to earn daily income. Tasks reset every 24 hours.
+          </p>
+        </div>
+        <DailyEarningsCard 
+          vipLevel={user.vipLevel} 
+          completedTasks={tasks.filter(t => t.isCompleted).length}
+        />
+      </div>
+
+      <TasksGrid 
+        tasks={tasks} 
+        user={{ id: user.id, vipLevel: user.vipLevel }}
+        onTaskComplete={handleTaskComplete}
+      />
+    </div>
+  );
+}

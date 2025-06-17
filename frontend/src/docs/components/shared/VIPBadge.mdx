@@ -1,0 +1,26 @@
+---
+title: VIP Badge
+description: Component displaying user's VIP status
+component: VIPBadge
+---
+
+```jsx live
+function VIPBadge({ level, showLabel = true }) {
+  const vipData = {
+    0: { color: 'gray', label: 'Standard' },
+    1: { color: 'blue', label: 'VIP 1' },
+    // ... up to VIP 8
+  };
+
+  return (
+    <div className={`vip-badge vip-${level}`}>
+      <div className="vip-icon" style={{ backgroundColor: vipData[level].color }}>
+        {level}
+      </div>
+      {showLabel && <span className="vip-label">{vipData[level].label}</span>}
+    </div>
+  );
+}
+
+// Example usage
+<VIPBadge level={3} />

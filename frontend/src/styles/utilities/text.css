@@ -1,0 +1,363 @@
+/* Text Utilities */
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-base {
+  font-size: 1rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+}
+
+.text-5xl {
+  font-size: 3rem;
+}
+
+.font-light {
+  font-weight: 300;
+}
+
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-extrabold {
+  font-weight: 800;
+}
+
+.leading-none {
+  line-height: 1;
+}
+
+.leading-tight {
+  line-height: 1.25;
+}
+
+.leading-normal {
+  line-height: 1.5;
+}
+
+.leading-relaxed {
+  line-height: 1.625;
+}
+
+.leading-loose {
+  line-height: 2;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+.text-uppercase {
+  text-transform: uppercase;
+}
+
+.text-lowercase {
+  text-transform: lowercase;
+}
+
+.text-capitalize {
+  text-transform: capitalize;
+}
+
+.text-transparent {
+  color: transparent;
+}
+
+.text-current {
+  color: currentColor;
+}
+
+.text-black {
+  color: #000;
+}
+
+.text-white {
+  color: #fff;
+}
+
+.text-gray-100 {
+  color: #f7fafc;
+}
+
+.text-gray-200 {
+  color: #edf2f7;
+}
+
+.text-gray-300 {
+  color: #e2e8f0;
+}
+
+.text-gray-400 {
+  color: #cbd5e0;
+}
+
+.text-gray-500 {
+  color: #a0aec0;
+}
+
+.text-gray-600 {
+  color: #718096;
+}
+
+.text-gray-700 {
+  color: #4a5568;
+}
+
+.text-gray-800 {
+  color: #2d3748;
+}
+
+.text-gray-900 {
+  color: #1a202c;
+}
+
+.text-red-100 {
+  color: #fff5f5;
+}
+
+.text-red-200 {
+  color: #fed7d7;
+}
+
+.text-red-300 {
+  color: #feb2b2;
+}
+
+.text-red-400 {
+  color: #fc8181;
+}
+
+.text-red-500 {
+  color: #f56565;
+}
+
+.text-red-600 {
+  color: #e53e3e;
+}
+
+.text-red-700 {
+  color: #c53030;
+}
+
+.text-red-800 {
+  color: #9b2c2c;
+}
+
+.text-red-900 {
+  color: #742a2a;
+}
+
+.text-blue-100 {
+  color: #ebf8ff;
+}
+
+.text-blue-200 {
+  color: #bee3f8;
+}
+
+.text-blue-300 {
+  color: #90cdf4;
+}
+
+.text-blue-400 {
+  color: #63b3ed;
+}
+
+.text-blue-500 {
+  color: #4299e1;
+}
+
+.text-blue-600 {
+  color: #3182ce;
+}
+
+.text-blue-700 {
+  color: #2b6cb0;
+}
+
+.text-blue-800 {
+  color: #2c5282;
+}
+
+.text-blue-900 {
+  color: #2a4365;
+}
+
+.text-green-100 {
+  color: #f0fff4;
+}
+
+.text-green-200 {
+  color: #c6f6d5;
+}
+
+.text-green-300 {
+  color: #9ae6b4;
+}
+
+.text-green-400 {
+  color: #68d391;
+}
+
+.text-green-500 {
+  color: #48bb78;
+}
+
+.text-green-600 {
+  color: #38a169;
+}
+
+.text-green-700 {
+  color: #2f855a;
+}
+
+.text-green-800 {
+  color: #276749;
+}
+
+.text-green-900 {
+  color: #22543d;
+}
+
+.text-yellow-100 {
+  color: #fffff0;
+}
+
+.text-yellow-200 {
+  color: #fefcbf;
+}
+
+.text-yellow-300 {
+  color: #faf089;
+}
+
+.text-yellow-400 {
+  color: #f6e05e;
+}
+
+.text-yellow-500 {
+  color: #ecc94b;
+}
+
+.text-yellow-600 {
+  color: #d69e2e;
+}
+
+.text-yellow-700 {
+  color: #b7791f;
+}
+
+.text-yellow-800 {
+  color: #975a16;
+}
+
+.text-yellow-900 {
+  color: #744210;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.line-through {
+  text-decoration: line-through;
+}
+
+.no-underline {
+  text-decoration: none;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.not-italic {
+  font-style: normal;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.whitespace-normal {
+  white-space: normal;
+}
+
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+
+.whitespace-pre {
+  white-space: pre;
+}
+
+.whitespace-pre-line {
+  white-space: pre-line;
+}
+
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+
+.break-normal {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.break-words {
+  overflow-wrap: break-word;
+}
+
+.break-all {
+  word-break: break-all;
+}

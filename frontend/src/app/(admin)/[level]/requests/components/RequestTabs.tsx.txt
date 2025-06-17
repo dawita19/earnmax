@@ -1,0 +1,35 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+
+const requestTypes = [
+  { id: 'purchase', label: 'Purchase Requests' },
+  { id: 'upgrade', label: 'Upgrade Requests' },
+  { id: 'withdrawal', label: 'Withdrawal Requests' },
+] as const;
+
+export function RequestTabs({ adminLevel }: { adminLevel: 'high' | 'low' }) {
+  const pathname = usePathname();
+  const currentType = pathname.split('/').pop();
+
+  return (
+    <div className="flex border-b">
+      {requestTypes.map((type) => (
+        <Link
+          key={type.id}
+          href={`/admin/${adminLevel}/requests/${type.id}`}
+          className={cn(
+            'px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100',
+            currentType === type.id
+              ? 'border-b-2 border-primary text-primary'
+              : 'text-muted-foreground'
+          )}
+        >
+          {type.label}
+        </Link>
+      ))}
+    </div>
+  );
+}

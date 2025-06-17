@@ -1,0 +1,113 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { SignupForm } from './components/SignupForm';
+import { VerificationStep } from './components/VerificationStep';
+import { signupUser, verifyOTP } from '@/lib/api/auth';
+import { AuthContainer } from '@/components/auth/AuthContainer';
+
+export default function SignupPage() {
+  const [step, setStep] = useState<'signup' | 'verify'>('signup');
+  const [userData, setUserData] = useState<{
+    user_id: number;
+    phone_number: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleSignup = async (data: {
+    full_name: string;
+    phone_number: string;
+    email?: string;
+    password: string;
+    inviter_code?: string;
+  }) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await signupUser({
+        ...data,
+        ip_address: await getClientIP() // Implement IP fetching
+      });
+
+      if (response.success) {
+        setUserData({
+          user_id: response.user.user_id,
+          phone_number: response.user.phone_number
+        });
+        setStep('verify');
+      } else {
+        setError(response.error || 'Signup failed');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerification = async (otp: string) => {
+    if (!userData) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await verifyOTP({
+        user_id: userData.user_id,
+        otp
+      });
+
+      if (response.success) {
+        router.push('/dashboard');
+      } else {
+        setError(response.error || 'Verification failed');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <AuthContainer
+      title={step === 'signup' ? 'Create Account' : 'Verify Phone Number'}
+      subtitle={
+        step === 'verify' 
+          ? `Enter the 6-digit code sent to ${userData?.phone_number}`
+          : 'Join our platform to start earning'
+      }
+      backLink={step === 'verify' ? () => setStep('signup') : undefined}
+    >
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+          {error}
+        </div>
+      )}
+
+      {step === 'signup' ? (
+        <SignupForm 
+          onSubmit={handleSignup} 
+          loading={loading} 
+        />
+      ) : (
+        <VerificationStep 
+          onSubmit={handleVerification} 
+          loading={loading}
+          phoneNumber={userData?.phone_number || ''}
+        />
+      )}
+    </AuthContainer>
+  );
+}
+
+async function getClientIP(): Promise<string> {
+  // Implement IP fetching logic (might need a backend API)
+  return '';
+}

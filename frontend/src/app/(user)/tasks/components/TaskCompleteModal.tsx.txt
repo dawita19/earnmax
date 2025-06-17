@@ -1,0 +1,46 @@
+import { Modal, Button, useDisclosure } from '@nextui-org/react';
+import { CheckCircle2 } from 'lucide-react';
+
+interface TaskCompleteModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  earnings: number;
+  taskName: string;
+}
+
+export const TaskCompleteModal = ({
+  isOpen,
+  onClose,
+  earnings,
+  taskName
+}: TaskCompleteModalProps) => {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      placement="center"
+      classNames={{
+        base: "bg-white dark:bg-gray-800 text-gray-900 dark:text-white",
+      }}
+    >
+      <div className="p-6 text-center">
+        <CheckCircle2 className="mx-auto h-16 w-16 text-green-500" />
+        <h3 className="mt-4 text-xl font-semibold">
+          Task Completed Successfully!
+        </h3>
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
+          You earned <span className="font-bold text-green-500">+{earnings} ETB</span> for completing "{taskName}"
+        </p>
+        <div className="mt-6">
+          <Button
+            color="success"
+            onPress={onClose}
+            className="px-6"
+          >
+            Continue
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};

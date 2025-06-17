@@ -1,0 +1,110 @@
+// src/lib/websocket/WebSocketManager.ts
+import { EventEmitter } from 'events';
+
+type WebSocketEvent = 
+  | 'admin-metrics-update'
+  | 'user-balance-update'
+  | 'notification'
+  | 'task-update';
+
+interface WebSocketMessage {
+  event: WebSocketEvent;
+  data: any;
+  timestamp: number;
+}
+
+class WebSocketManager extends EventEmitter {
+  private static instance: WebSocketManager;
+  private socket: WebSocket | null = null;
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+  private reconnectInterval = 3000;
+
+  private constructor() {
+    super();
+  }
+
+  public static getInstance(): WebSocketManager {
+    if (!WebSocketManager.instance) {
+      WebSocketManager.instance = new WebSocketManager();
+    }
+    return WebSocketManager.instance;
+  }
+
+  public connect(token: string): void {
+    if (this.socket) {
+      this.disconnect();
+    }
+
+    const wsUrl = `wss://${window.location.host}/ws?token=${encodeURIComponent(token)}`;
+    this.socket = new WebSocket(wsUrl);
+
+    this.socket.onopen = () => {
+      this.reconnectAttempts = 0;
+      this.emit('connected');
+    };
+
+    this.socket.onmessage = (event) => {
+      try {
+        const message: WebSocketMessage = JSON.parse(event.data);
+        this.emit(message.event, message.data);
+      } catch (error) {
+        console.error('WebSocket message parsing error:', error);
+      }
+    };
+
+    this.socket.onclose = () => {
+      this.handleReconnect();
+    };
+
+    this.socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+  }
+
+  public disconnect(): void {
+    if (this.socket) {
+      this.socket.close();
+      this.socket = null;
+    }
+  }
+
+  public send(event: WebSocketEvent, data: any): void {
+    if (this.socket?.readyState === WebSocket.OPEN) {
+      const message: WebSocketMessage = {
+        event,
+        data,
+        timestamp: Date.now()
+      };
+      this.socket.send(JSON.stringify(message));
+    }
+  }
+
+  private handleReconnect(): void {
+    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      setTimeout(() => {
+        this.reconnectAttempts++;
+        this.connect(localStorage.getItem('authToken') || '');
+      }, this.reconnectInterval);
+    }
+  }
+}
+
+export const webSocketManager = WebSocketManager.getInstance();
+
+// src/lib/websocket/hooks.ts
+import { useEffect } from 'react';
+import { webSocketManager } from './WebSocketManager';
+
+export const useWebSocket = (event: WebSocketEvent, callback: (data: any) => void) => {
+  useEffect(() => {
+    webSocketManager.on(event, callback);
+    return () => {
+      webSocketManager.off(event, callback);
+    };
+  }, [event, callback]);
+};
+
+// src/lib/websocket/index.ts
+export * from './WebSocketManager';
+export * from './hooks';

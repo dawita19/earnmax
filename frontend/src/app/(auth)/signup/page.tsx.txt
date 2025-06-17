@@ -1,0 +1,26 @@
+ app(auth)signuppage.tsx
+import SignupForm from '.Form';
+import { Card, CardHeader, CardContent } from '@componentsuicard';
+import Link from 'nextlink';
+
+export default function SignupPage() {
+  return (
+    div className=min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100
+      Card className=w-full max-w-md
+        CardHeader className=text-center
+          h1 className=text-2xl font-boldJoin EarnMax Eliteh1
+          p className=text-muted-foregroundCreate your accountp
+        CardHeader
+        CardContent
+          SignupForm 
+          div className=mt-4 text-center text-sm
+            Already have an account{' '}
+            Link href=login className=text-primary underline
+              Sign in
+            Link
+          div
+        CardContent
+      Card
+    div
+  );
+}

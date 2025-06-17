@@ -1,0 +1,50 @@
+import { TaskCard } from './TaskCard';
+import { Task } from '@/types';
+import { User } from '@/types/user';
+import { Grid } from '@nextui-org/react';
+
+interface TasksGridProps {
+  tasks: Task[];
+  user: Pick<User, 'id' | 'vipLevel'>;
+  onTaskComplete: (taskId: string, earnings: number) => void;
+}
+
+export const TasksGrid = ({ tasks, user, onTaskComplete }: TasksGridProps) => {
+  const dailyCompletionPercentage = Math.round(
+    (tasks.filter(t => t.isCompleted).length / tasks.length * 100
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold">Daily Tasks</h2>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium">
+              {dailyCompletionPercentage}% Completed
+            </span>
+            <div className="w-32 bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+              <div
+                className="bg-blue-600 h-2.5 rounded-full"
+                style={{ width: `${dailyCompletionPercentage}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Grid.Container gap={2} justify="flex-start">
+        {tasks.map((task) => (
+          <Grid xs={12} sm={6} lg={4} key={task.id}>
+            <TaskCard
+              task={task}
+              vipLevel={user.vipLevel}
+              userId={user.id}
+              onTaskComplete={onTaskComplete}
+            />
+          </Grid>
+        ))}
+      </Grid.Container>
+    </div>
+  );
+};

@@ -1,0 +1,9 @@
+POST https://api.earnmaxelite.com/admin/v1/upgrades/98765/process
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6MTIzLCJsZXZlbCI6ImhpZ2gifQ.jkl012
+Content-Type: application/json
+
+{
+  "balance_deduction": 4500.00,
+  "new_vip_level": 3,
+  "admin_notes": "Upgraded from VIP2 with balance adjustment"
+}

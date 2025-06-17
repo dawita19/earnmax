@@ -1,0 +1,71 @@
+---
+title: Authentication System
+description: Secure login for admins and users
+---
+
+```jsx live
+const LoginForm = ({ userType }) => {
+  const [formData, setFormData] = useState({
+    identifier: '',
+    password: '',
+    twoFactorCode: ''
+  });
+  const [step, setStep] = useState(1);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      if (step === 1) {
+        // Initial auth check
+        await API.post('/auth/verify', {
+          identifier: formData.identifier,
+          userType
+        });
+        setStep(2);
+      } else {
+        // Complete login
+        const response = await API.post('/auth/login', {
+          ...formData,
+          userType
+        });
+        auth.login(response.data.token);
+      }
+    } catch (error) {
+      notifyError(error.message);
+    }
+  };
+
+  return (
+    <AuthContainer type="login">
+      {step === 1 ? (
+        <>
+          <Input
+            label={userType === 'admin' ? 'Admin ID' : 'Phone/Email'}
+            value={formData.identifier}
+            onChange={(e) => setFormData({...formData, identifier: e.target.value})}
+          />
+          <PasswordInput
+            value={formData.password}
+            onChange={(value) => setFormData({...formData, password: value})}
+          />
+        </>
+      ) : (
+        <TwoFactorAuth
+          onComplete={(code) => {
+            setFormData({...formData, twoFactorCode: code});
+            handleSubmit(e);
+          }}
+        />
+      )}
+      
+      <Button 
+        type="submit" 
+        onClick={handleSubmit}
+        disabled={!formData.identifier || !formData.password}
+      >
+        {step === 1 ? 'Continue' : 'Login'}
+      </Button>
+    </AuthContainer>
+  );
+};

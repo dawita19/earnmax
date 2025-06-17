@@ -1,0 +1,77 @@
+// src/app/(user)/dashboard/page.tsx
+import React from 'react';
+import { BalanceCard } from './components/BalanceCard';
+import { EarningsChart } from './components/EarningsChart';
+import { QuickActions } from './components/QuickActions';
+import { getCurrentUser } from '@/lib/auth';
+import { api } from '@/trpc/server';
+import { Notifications } from './components/Notifications';
+
+export default async function DashboardPage() {
+  const user = await getCurrentUser();
+  const earningsData = await api.user.earningsHistory.query();
+  const vipDetails = await api.vip.details.query({ level: user.vipLevel });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <Notifications userId={user.id} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <BalanceCard
+            currentBalance={user.balance}
+            totalEarnings={user.totalEarnings}
+            totalWithdrawn={user.totalWithdrawn}
+            vipLevel={user.vipLevel}
+            vipMaxWithdrawal={vipDetails.maxTotalWithdrawal}
+          />
+
+          <div className="rounded-lg border bg-card p-6">
+            <h3 className="text-lg font-semibold mb-4">Earnings Overview</h3>
+            <EarningsChart data={earningsData} />
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <QuickActions
+            onWithdraw={() => {/* Client-side action */}}
+            onUpgrade={(level) => {/* Client-side action */}}
+            onInvite={() => {/* Client-side action */}}
+            onTaskStart={() => {/* Client-side action */}}
+            vipLevel={user.vipLevel}
+          />
+
+          <div className="rounded-lg border bg-card p-6">
+            <h3 className="text-lg font-semibold mb-4">VIP Benefits</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Current Level</span>
+                <span className="font-medium">VIP {user.vipLevel}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Daily Earnings</span>
+                <span className="font-medium">
+                  {vipDetails.dailyEarning} ETB
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Per Task</span>
+                <span className="font-medium">
+                  {vipDetails.perTaskEarning} ETB
+                </span>
+              </div>
+              <div className="pt-3 mt-3 border-t">
+                <p className="text-sm text-muted-foreground">
+                  {vipDetails.investmentArea}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

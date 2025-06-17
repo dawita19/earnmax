@@ -1,0 +1,27 @@
+{
+  "projects": [
+    {
+      "name": "earnmax-elite",
+      "services": [
+        {
+          "$ref": "service-templates/backend.json"
+        },
+        {
+          "$ref": "service-templates/database.json"
+        }
+      ],
+      "variables": {
+        "NODE_ENV": "production",
+        "PORT": "3001",
+        "JWT_SECRET": "@jwt-secret",
+        "DATABASE_URL": "@database-url"
+      },
+      "deploy": {
+        "branch": "main",
+        "restartPolicy": {
+          "maxRetries": 3
+        }
+      }
+    }
+  ]
+}

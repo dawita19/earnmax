@@ -1,0 +1,27 @@
+import { notFound } from 'next/navigation';
+import { getPaymentAccountById, updatePaymentAccount } from '@/lib/api/payment-accounts';
+import { AccountForm } from '../../components/AccountForm';
+
+export default async function EditAccountPage({ params }: { params: { id: string } }) {
+  const account = await getPaymentAccountById(params.id);
+  
+  if (!account) {
+    return notFound();
+  }
+
+  async function handleSubmit(formData: FormData) {
+    'use server';
+    await updatePaymentAccount(params.id, formData);
+  }
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">Edit Payment Account</h1>
+      <AccountForm 
+        account={account} 
+        onSubmit={handleSubmit} 
+        actionType="edit"
+      />
+    </div>
+  );
+}

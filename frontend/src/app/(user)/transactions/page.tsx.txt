@@ -1,0 +1,59 @@
+import { useState } from 'react';
+import { HistoryTable } from './components/HistoryTable';
+import { WithdrawModal } from './components/WithdrawModal';
+import { Button } from '@/components/ui/Button';
+import { useUser } from '@/context/UserContext';
+import { InformationCircleIcon } from '@heroicons/react/outline';
+
+export default function TransactionsPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user } = useUser();
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Withdraw Funds</h1>
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            disabled={user.vip_level === 0 && user.total_withdrawn >= 300}
+          >
+            New Withdrawal
+          </Button>
+        </div>
+
+        {user.vip_level === 0 && user.total_withdrawn >= 300 && (
+          <div className="mb-6 p-4 bg-yellow-50 rounded-lg flex items-start">
+            <InformationCircleIcon className="h-5 w-5 text-yellow-400 mr-2 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-medium text-yellow-800">Upgrade Required</h3>
+              <p className="text-sm text-yellow-700 mt-1">
+                You've reached the maximum withdrawal limit for VIP0. Upgrade your VIP level to continue withdrawing.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-sm font-medium text-gray-500">Available Balance</h3>
+            <p className="text-2xl font-semibold text-gray-900">{user.balance} ETB</p>
+          </div>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-sm font-medium text-gray-500">Total Withdrawn</h3>
+            <p className="text-2xl font-semibold text-gray-900">{user.total_withdrawn} ETB</p>
+          </div>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-sm font-medium text-gray-500">VIP Level</h3>
+            <p className="text-2xl font-semibold text-gray-900">VIP{user.vip_level}</p>
+          </div>
+        </div>
+
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Withdrawal History</h2>
+        <HistoryTable />
+      </div>
+
+      <WithdrawModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+    </div>
+  );
+}

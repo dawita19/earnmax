@@ -1,0 +1,25 @@
+// src/app/api/auth/signup/schema.ts
+import { z } from 'zod';
+
+export const signupSchema = z.object({
+  full_name: z.string().min(3, {
+    message: "Full name must be at least 3 characters"
+  }),
+  phone_number: z.string().min(10, {
+    message: "Phone number must be at least 10 digits"
+  }),
+  email: z.string().email().optional().or(z.literal('')),
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters"
+  }),
+  confirm_password: z.string(),
+  invite_code: z.string().min(6, {
+    message: "Invite code must be 6 characters"
+  }),
+  ip_address: z.string().ip()
+}).refine(data => data.password === data.confirm_password, {
+  message: "Passwords don't match",
+  path: ["confirm_password"]
+});
+
+export type SignupInput = z.infer<typeof signupSchema>;

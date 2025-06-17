@@ -1,0 +1,142 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
+import { Button } from '@/components/ui/button'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+
+const formSchema = z.object({
+  username: z.string().min(1, 'Username is required'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  code: z.string().optional(),
+})
+
+export default function LoginForm() {
+  const [is2FAStep, setIs2FAStep] = useState(false)
+  const [error, setError] = useState('')
+  const router = useRouter()
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: '',
+      password: '',
+      code: '',
+    },
+  })
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setError('')
+      
+      const result = await signIn('credentials', {
+        ...values,
+        redirect: false,
+        callbackUrl: '/protected/admin/dashboard',
+      })
+
+      if (result?.error === '2FA_REQUIRED') {
+        setIs2FAStep(true)
+        return
+      }
+
+      if (result?.error) {
+        throw new Error(result.error)
+      }
+
+      if (result?.url) {
+        router.push(result.url)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed')
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {!is2FAStep ? (
+          <>
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="admin_username"
+                      autoComplete="username"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        ) : (
+          <FormField
+            control={form.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>2FA Code</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="123456"
+                    autoComplete="one-time-code"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <Button type="submit" className="w-full">
+          {is2FAStep ? 'Verify' : 'Login'}
+        </Button>
+      </form>
+    </Form>
+  )
+}

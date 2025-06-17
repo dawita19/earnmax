@@ -1,0 +1,21 @@
+import { z } from 'zod';
+
+export const userSchema = z.object({
+  id: z.string(),
+  fullName: z.string(),
+  phoneNumber: z.string(),
+  email: z.string().email().optional(),
+  vipLevel: z.number().int().min(0).max(8),
+  balance: z.number().nonnegative(),
+  totalEarnings: z.number().nonnegative(),
+  accountStatus: z.enum(['active', 'suspended', 'locked']),
+  joinDate: z.date()
+});
+
+export const suspendUserSchema = z.object({
+  userId: z.string().min(1, "User ID is required"),
+  reason: z.string().min(10, "Reason must be at least 10 characters")
+});
+
+export type UserSchema = z.infer<typeof userSchema>;
+export type SuspendUserSchema = z.infer<typeof suspendUserSchema>;

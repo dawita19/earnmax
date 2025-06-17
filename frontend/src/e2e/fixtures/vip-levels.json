@@ -1,0 +1,26 @@
+[
+  {
+    "level": 0,
+    "investment": 0,
+    "dailyEarning": 20,
+    "perTask": 5.00,
+    "minWithdrawal": 60,
+    "maxWithdrawal": 300
+  },
+  {
+    "level": 1,
+    "investment": 1200,
+    "dailyEarning": 40,
+    "perTask": 10.00,
+    "minWithdrawal": 40,
+    "maxWithdrawal": 4800
+  },
+  {
+    "level": 8,
+    "investment": 120000,
+    "dailyEarning": 4000,
+    "perTask": 1000.00,
+    "minWithdrawal": 4000,
+    "maxWithdrawal": 480000
+  }
+]

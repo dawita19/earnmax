@@ -1,0 +1,113 @@
+import { RequestsTable } from './components/RequestsTable';
+import { purchaseRequestColumns } from './components/RequestsTable';
+import { RequestTabs } from './components/RequestTabs';
+import { getPurchaseRequests } from '@/lib/api/admin-requests';
+import { AdminLevel } from '@/types';
+
+interface RequestPageProps {
+  params: {
+    level: AdminLevel;
+    type: 'purchase' | 'upgrade' | 'withdrawal';
+  };
+}
+
+export default async function RequestPage({ params }: RequestPageProps) {
+  // Fetch requests based on type
+  let requests = [];
+  let columns = purchaseRequestColumns;
+
+  try {
+    switch (params.type) {
+      case 'purchase':
+        requests = await getPurchaseRequests(params.level);
+        break;
+      case 'upgrade':
+        // requests = await getUpgradeRequests(params.level);
+        break;
+      case 'withdrawal':
+        // requests = await getWithdrawalRequests(params.level);
+        break;
+      default:
+        throw new Error('Invalid request type');
+    }
+  } catch (error) {
+    console.error('Failed to fetch requests:', error);
+    // Handle error appropriately
+  }
+
+  return (
+    <div className="container py-6 space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold">Request Management</h1>
+        <p className="text-muted-foreground">
+          Review and process {params.type} requests
+        </p>
+      </div>
+
+      <RequestTabs adminLevel={params.level} />
+
+      <div className="bg-white rounded-lg shadow p-6">
+        <RequestsTable
+          columns={columns}
+          data={requests}
+          adminLevel={params.level}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatCard
+          title="Pending Requests"
+          value={requests.length}
+          description={`${params.type} awaiting review`}
+        />
+        <StatCard
+          title="Total Amount"
+          value={requests.reduce((sum, r) => sum + r.amount, 0)}
+          description="Combined value of requests"
+          isCurrency
+        />
+        <StatCard
+          title="Avg. Processing Time"
+          value="4.2"
+          description="Hours to complete review"
+          unit="hours"
+        />
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  title,
+  value,
+  description,
+  isCurrency = false,
+  unit = '',
+}: {
+  title: string;
+  value: any;
+  description: string;
+  isCurrency?: boolean;
+  unit?: string;
+}) {
+  const formattedValue = isCurrency
+    ? new Intl.NumberFormat('en-ET', {
+        style: 'currency',
+        currency: 'ETB',
+      }).format(value)
+    : value;
+
+  return (
+    <div className="border rounded-lg p-4">
+      <h3 className="text-sm font-medium text-muted-foreground">
+        {title}
+      </h3>
+      <p className="text-2xl font-bold mt-1">
+        {formattedValue} {unit && !isCurrency && unit}
+      </p>
+      <p className="text-sm text-muted-foreground mt-1">
+        {description}
+      </p>
+    </div>
+  );
+}

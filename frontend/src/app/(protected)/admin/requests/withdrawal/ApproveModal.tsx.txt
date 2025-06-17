@@ -1,0 +1,124 @@
+'use client';
+
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { approveWithdrawal } from '@/actions/withdrawals';
+import { WithdrawalRequest } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
+import { ApproveWithdrawalSchema } from '@/schemas';
+
+interface ApproveModalProps {
+  request: WithdrawalRequest;
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+export function ApproveModal({
+  request,
+  open,
+  onClose,
+  onSuccess,
+}: ApproveModalProps) {
+  const form = useForm({
+    resolver: zodResolver(ApproveWithdrawalSchema),
+    defaultValues: {
+      transactionId: '',
+      adminNotes: '',
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof ApproveWithdrawalSchema>) => {
+    try {
+      await approveWithdrawal(request.id, values);
+      toast.success('Withdrawal approved successfully');
+      onSuccess();
+      onClose();
+    } catch (error) {
+      toast.error('Failed to approve withdrawal');
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Approve Withdrawal</DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">User</p>
+              <p>{request.user.fullName}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Amount</p>
+              <p>{request.amount.toLocaleString()} ETB</p>
+            </div>
+          </div>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="transactionId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Transaction ID</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Enter transaction ID" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="adminNotes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Admin Notes</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="Optional notes about this approval"
+                        rows={3}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button type="submit">Confirm Approval</Button>
+              </div>
+            </form>
+          </Form>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

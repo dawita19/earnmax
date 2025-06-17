@@ -1,0 +1,29 @@
+{
+  "name": "earnmax-backend",
+  "type": "backend",
+  "source": {
+    "type": "github",
+    "repo": "your-github-username/earnmax-elite",
+    "branch": "main",
+    "path": "backend",
+    "autoDeploy": true
+  },
+  "build": {
+    "builder": "nixpacks",
+    "buildCommand": "yarn build",
+    "startCommand": "yarn start:prod",
+    "environmentVariables": {
+      "NODE_ENV": "production"
+    }
+  },
+  "resources": {
+    "cpu": 1,
+    "memory": 1024
+  },
+  "ports": [
+    {
+      "port": 3001,
+      "protocol": "http"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+// components/auth/PhoneInput.tsx
+'use client';
+
+import { Input, InputProps } from '@/components/ui/input';
+import { useState } from 'react';
+
+interface PhoneInputProps extends Omit<InputProps, 'onChange' | 'value'> {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export default function PhoneInput({ value, onChange, ...props }: PhoneInputProps) {
+  const [rawValue, setRawValue] = useState(value);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    let formatted = '';
+    
+    if (input.length > 0) {
+      formatted = '+251 '; // Ethiopia country code
+      if (input.length > 3) {
+        formatted += `${input.substring(3, 5)} `;
+      }
+      if (input.length > 5) {
+        formatted += input.substring(5, 8);
+      }
+      if (input.length > 8) {
+        formatted += ` ${input.substring(8, 12)}`;
+      }
+    }
+    
+    setRawValue(formatted);
+    onChange(input); // Send raw digits to form
+  };
+
+  return (
+    <Input
+      type="tel"
+      placeholder="+251 91 234 5678"
+      value={rawValue}
+      onChange={handleChange}
+      {...props}
+    />
+  );
+}

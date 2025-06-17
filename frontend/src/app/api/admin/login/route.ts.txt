@@ -1,0 +1,73 @@
+import { NextResponse } from 'next/server';
+import { Admin } from '@/models';
+import { connectDB } from '@/config/db';
+import { signToken } from '@/lib/jwt';
+import { adminIPWhitelist } from '../middleware/auth';
+
+export const POST = async (req: Request) => {
+  // Apply IP whitelisting first
+  const ipCheck = await adminIPWhitelist(new NextRequest(req));
+  if (ipCheck.status !== 200) {
+    return ipCheck;
+  }
+
+  await connectDB();
+
+  const { username, password } = await req.json();
+
+  if (!username || !password) {
+    return NextResponse.json(
+      { error: 'Username and password required' },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const admin = await Admin.findOne({ username });
+    
+    if (!admin || !(await admin.comparePassword(password))) {
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      );
+    }
+
+    if (!admin.is_active) {
+      return NextResponse.json(
+        { error: 'Account deactivated' },
+        { status: 403 }
+      );
+    }
+
+    // Create token
+    const token = signToken(
+      { id: admin._id, admin_level: admin.admin_level },
+      '7d'
+    );
+
+    const response = NextResponse.json({
+      _id: admin._id,
+      username: admin.username,
+      admin_level: admin.admin_level,
+      two_factor_enabled: admin.two_factor_enabled
+    });
+
+    // Set secure HTTP-only cookie
+    response.cookies.set('earnmax_admin_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 604800, // 7 days
+      path: '/'
+    });
+
+    return response;
+
+  } catch (err) {
+    console.error('Admin login error:', err);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+};

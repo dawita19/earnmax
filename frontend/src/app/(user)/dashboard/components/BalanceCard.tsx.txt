@@ -1,0 +1,59 @@
+// src/app/(user)/dashboard/components/BalanceCard.tsx
+import React from 'react';
+import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { formatCurrency } from '@/lib/utils';
+
+interface BalanceCardProps {
+  currentBalance: number;
+  totalEarnings: number;
+  totalWithdrawn: number;
+  vipLevel: number;
+  vipMaxWithdrawal: number;
+}
+
+export const BalanceCard: React.FC<BalanceCardProps> = ({
+  currentBalance,
+  totalEarnings,
+  totalWithdrawn,
+  vipLevel,
+  vipMaxWithdrawal,
+}) => {
+  const withdrawalProgress = (totalWithdrawn / vipMaxWithdrawal) * 100;
+
+  return (
+    <Card className="border-primary/20">
+      <CardHeader className="pb-2">
+        <h3 className="text-lg font-semibold">Account Balance</h3>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex justify-between items-center">
+          <span className="text-muted-foreground">Available</span>
+          <span className="text-2xl font-bold text-primary">
+            {formatCurrency(currentBalance)}
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">VIP {vipLevel} Limit</span>
+            <span>
+              {formatCurrency(totalWithdrawn)} / {formatCurrency(vipMaxWithdrawal)}
+            </span>
+          </div>
+          <Progress value={withdrawalProgress} className="h-2" />
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between text-sm pt-0">
+        <div>
+          <span className="text-muted-foreground">Total Earned</span>
+          <p className="font-medium">{formatCurrency(totalEarnings)}</p>
+        </div>
+        <div className="text-right">
+          <span className="text-muted-foreground">Total Withdrawn</span>
+          <p className="font-medium">{formatCurrency(totalWithdrawn)}</p>
+        </div>
+      </CardFooter>
+    </Card>
+  );
+};

@@ -1,0 +1,31 @@
+import React from 'react';
+import { Box, Container, Grid, Typography } from '@mui/material';
+import { MetricsGrid, RealtimeStats, VipDistributionChart } from './components';
+import { WelcomeAnimation } from '@/components/WelcomeAnimation';
+
+export default function AdminOverviewPage() {
+  return (
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Box mb={4}>
+        <WelcomeAnimation userType="boss" />
+      </Box>
+
+      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+        Dashboard Overview
+      </Typography>
+
+      <Box mb={4}>
+        <MetricsGrid />
+      </Box>
+
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={8}>
+          <RealtimeStats />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <VipDistributionChart />
+        </Grid>
+      </Grid>
+    </Container>
+  );
+}

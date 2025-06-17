@@ -1,0 +1,120 @@
+// src/app/api/auth/login/route.ts
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { db } from '@/lib/db';
+import { compare } from 'bcryptjs';
+import { signJWT } from '@/lib/jwt';
+import { cookies } from 'next/headers';
+import { ADMIN_USERNAMES } from '@/config/auth';
+
+const loginSchema = z.object({
+  identifier: z.string().min(3),
+  password: z.string().min(6),
+  isAdmin: z.boolean().default(false)
+});
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { identifier, password, isAdmin } = loginSchema.parse(body);
+
+    // Check if admin login attempt
+    if (isAdmin) {
+      const admin = await db.admin.findUnique({
+        where: { username: identifier }
+      });
+
+      if (!admin || !(await compare(password, admin.password_hash))) {
+        return NextResponse.json(
+          { error: 'Invalid admin credentials' },
+          { status: 401 }
+        );
+      }
+
+      if (!admin.is_active) {
+        return NextResponse.json(
+          { error: 'Admin account deactivated' },
+          { status: 403 }
+        );
+      }
+
+      // Create JWT token for admin
+      const token = await signJWT({
+        sub: admin.admin_id,
+        role: 'admin',
+        level: admin.admin_level
+      });
+
+      cookies().set('auth-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24, // 1 day
+        path: '/'
+      });
+
+      return NextResponse.json({
+        message: 'Admin login successful',
+        user: {
+          id: admin.admin_id,
+          username: admin.username,
+          level: admin.admin_level
+        }
+      });
+    }
+
+    // Regular user login
+    const user = await db.user.findFirst({
+      where: {
+        OR: [
+          { email: identifier },
+          { phone_number: identifier }
+        ],
+        account_status: 'active'
+      }
+    });
+
+    if (!user || !(await compare(password, user.password_hash))) {
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      );
+    }
+
+    if (user.is_locked) {
+      return NextResponse.json(
+        { error: 'Account locked. Please contact support.' },
+        { status: 403 }
+      );
+    }
+
+    const token = await signJWT({
+      sub: user.user_id,
+      role: 'user',
+      vip: user.vip_level
+    });
+
+    cookies().set('auth-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
+    });
+
+    return NextResponse.json({
+      message: 'Login successful',
+      user: {
+        id: user.user_id,
+        name: user.full_name,
+        vip: user.vip_level,
+        balance: user.balance
+      }
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

@@ -1,0 +1,43 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useUser } from '@/contexts/user-context';
+
+export function ReferralStats() {
+  const { user } = useUser();
+
+  const stats = [
+    { name: 'Total Team', value: user?.total_invites || 0 },
+    { name: '1st Level', value: user?.first_level_invites || 0 },
+    { name: '2nd Level', value: user?.second_level_invites || 0 },
+    { name: '3rd Level', value: user?.third_level_invites || 0 },
+    { name: '4th Level', value: user?.fourth_level_invites || 0 },
+    { 
+      name: 'Total Bonus', 
+      value: new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'ETB',
+      }).format(user?.total_referral_bonus || 0) 
+    },
+  ];
+
+  return (
+    <Card className="border">
+      <CardHeader>
+        <CardTitle>Team Statistics</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {stats.map((stat) => (
+            <div key={stat.name} className="flex flex-col items-start gap-1">
+              <p className="text-sm font-medium text-muted-foreground">
+                {stat.name}
+              </p>
+              <p className="text-xl font-semibold">
+                {stat.value}
+              </p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

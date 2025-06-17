@@ -1,0 +1,70 @@
+@startuml EarnMaxElite_Database_Schema
+
+' Entities
+entity users {
+  * user_id [PK]
+  --
+  * full_name
+  * phone_number
+  * email
+  * password_hash
+  * invite_code
+  * vip_level
+  * vip_amount
+  * balance
+  * account_status
+  * inviter_id [FK]
+}
+
+entity admins {
+  * admin_id [PK]
+  --
+  * username
+  * password_hash
+  * admin_level
+}
+
+entity vip_levels {
+  * level_id [PK]
+  --
+  * investment_amount
+  * daily_earning
+  * per_task_earning
+  * min_withdrawal
+  * max_total_withdrawal
+}
+
+entity purchase_requests {
+  * request_id [PK]
+  --
+  * user_id [FK]
+  * vip_level
+  * amount
+  * status
+}
+
+entity withdrawal_requests {
+  * request_id [PK]
+  --
+  * user_id [FK]
+  * amount
+  * status
+}
+
+entity referral_network {
+  * relation_id [PK]
+  --
+  * inviter_id [FK]
+  * invitee_id [FK]
+  * level
+}
+
+' Relationships
+users }|--|| users : inviter_id
+users ||--o{ purchase_requests
+users ||--o{ withdrawal_requests
+users ||--o{ referral_network : inviter_id
+users ||--o{ referral_network : invitee_id
+vip_levels ||--o{ users : vip_level
+
+@enduml

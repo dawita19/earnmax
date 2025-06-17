@@ -1,0 +1,68 @@
+'use client';
+
+import { useFormState } from 'react-dom';
+import { PaymentAccount } from '@/types';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Select, SelectItem } from '@/components/ui/select';
+
+type AccountFormProps = {
+  account?: PaymentAccount;
+  onSubmit: (formData: FormData) => void;
+  actionType: 'create' | 'edit';
+};
+
+export function AccountForm({ account, onSubmit, actionType }: AccountFormProps) {
+  const [state, formAction] = useFormState(onSubmit, null);
+
+  return (
+    <form action={formAction} className="space-y-4 max-w-lg">
+      <div>
+        <label htmlFor="accountName" className="block mb-2">Account Name</label>
+        <Input
+          id="accountName"
+          name="accountName"
+          defaultValue={account?.accountName || ''}
+          required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="accountType" className="block mb-2">Account Type</label>
+        <Select 
+          name="accountType" 
+          defaultValue={account?.accountType || ''}
+          required
+        >
+          <SelectItem value="bank">Bank Account</SelectItem>
+          <SelectItem value="mobile_money">Mobile Money</SelectItem>
+          <SelectItem value="crypto">Crypto Wallet</SelectItem>
+        </Select>
+      </div>
+
+      <div>
+        <label htmlFor="accountNumber" className="block mb-2">Account Number</label>
+        <Input
+          id="accountNumber"
+          name="accountNumber"
+          defaultValue={account?.accountNumber || ''}
+          required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="accountHolder" className="block mb-2">Account Holder</label>
+        <Input
+          id="accountHolder"
+          name="accountHolder"
+          defaultValue={account?.accountHolder || ''}
+          required
+        />
+      </div>
+
+      <Button type="submit" className="mt-4">
+        {actionType === 'create' ? 'Create Account' : 'Update Account'}
+      </Button>
+    </form>
+  );
+}

@@ -1,0 +1,54 @@
+import { getUserProfile } from '@/lib/api/user';
+import { verifySession } from '@/lib/auth';
+import PersonalInfoForm from './components/PersonalInfoForm';
+import SecurityForm from './components/SecurityForm';
+import VIPBadge from './components/VIPBadge';
+import AccountBalanceCard from './components/AccountBalanceCard';
+import ProfileSkeleton from './components/ProfileSkeleton';
+import { Suspense } from 'react';
+
+export default async function ProfilePage() {
+  const session = await verifySession();
+  const user = await getUserProfile(session.userId);
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="md:w-2/3 space-y-6">
+          <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
+          
+          <Suspense fallback={<ProfileSkeleton />}>
+            <div className="space-y-6">
+              <div className="bg-white shadow rounded-lg p-6">
+                <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
+                <PersonalInfoForm 
+                  fullName={user.full_name} 
+                  email={user.email} 
+                  phone={user.phone_number}
+                  joinDate={user.join_date}
+                />
+              </div>
+
+              <div className="bg-white shadow rounded-lg p-6">
+                <h2 className="text-xl font-semibold mb-4">Security Settings</h2>
+                <SecurityForm 
+                  twoFactorEnabled={user.two_factor_enabled}
+                  lastLogin={user.last_login}
+                />
+              </div>
+            </div>
+          </Suspense>
+        </div>
+
+        <div className="md:w-1/3 space-y-6">
+          <VIPBadge level={user.vip_level} />
+          <AccountBalanceCard 
+            balance={user.balance}
+            totalEarnings={user.total_earnings}
+            totalWithdrawn={user.total_withdrawn}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

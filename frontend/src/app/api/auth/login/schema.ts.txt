@@ -1,0 +1,14 @@
+// src/app/api/auth/login/schema.ts
+import { z } from 'zod';
+
+export const loginSchema = z.object({
+  identifier: z.string().min(3, {
+    message: "Identifier must be at least 3 characters"
+  }),
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters"
+  }),
+  isAdmin: z.boolean().default(false)
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;

@@ -1,0 +1,237 @@
+.user-tasks-container {
+  background-color: var(--background-primary);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.user-tasks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: var(--primary-500);
+  color: white;
+}
+
+.user-tasks-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+}
+
+.user-tasks-refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: var(--transition-standard);
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.user-tasks-progress {
+  padding: 1rem 1.5rem;
+  background-color: var(--primary-100);
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.user-tasks-progress-bar {
+  height: 0.5rem;
+  background-color: var(--neutral-200);
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.user-tasks-progress-fill {
+  height: 100%;
+  background-color: var(--primary-500);
+  border-radius: 0.25rem;
+  transition: width 0.5s ease;
+}
+
+.user-tasks-progress-text {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.user-tasks-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-task {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--neutral-200);
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.user-task-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--primary-100);
+  color: var(--primary-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+}
+
+.user-task-content {
+  flex: 1;
+}
+
+.user-task-title {
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.user-task-description {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.user-task-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-task-earning {
+  font-weight: var(--font-semibold);
+  color: var(--success-600);
+  white-space: nowrap;
+  
+  &::after {
+    content: ' Birr';
+    font-weight: var(--font-normal);
+  }
+}
+
+.user-task-button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: var(--font-medium);
+  transition: var(--transition-standard);
+  white-space: nowrap;
+  
+  &.complete {
+    background-color: var(--primary-500);
+    color: white;
+    
+    &:hover {
+      background-color: var(--primary-600);
+    }
+  }
+  
+  &.completed {
+    background-color: var(--success-500);
+    color: white;
+    cursor: default;
+  }
+  
+  &.disabled {
+    background-color: var(--neutral-200);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+  }
+}
+
+.user-tasks-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.user-tasks-empty-icon {
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 1.5rem;
+  color: var(--neutral-400);
+}
+
+.user-tasks-empty-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.user-tasks-empty-description {
+  color: var(--text-secondary);
+  max-width: 400px;
+  margin-bottom: 1.5rem;
+}
+
+.user-tasks-history {
+  margin-top: 2rem;
+}
+
+.user-tasks-history-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.user-tasks-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--background-primary);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.user-tasks-history-table th {
+  text-align: left;
+  padding: 1rem 1.5rem;
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+  background-color: var(--background-tertiary);
+}
+
+.user-tasks-history-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--neutral-200);
+  vertical-align: middle;
+}
+
+.user-tasks-history-task {
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.user-tasks-history-earning {
+  color: var(--success-600);
+  font-weight: var(--font-semibold);
+  
+  &::after {
+    content: ' Birr';
+    font-weight: var(--font-normal);
+  }
+}
+
+.user-tasks-history-date {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}

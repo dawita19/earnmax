@@ -1,0 +1,97 @@
+import { NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { z } from 'zod';
+
+const verifySchema = z.object({
+  user_id: z.number().int().positive(),
+  otp: z.string().length(6)
+});
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { user_id, otp } = verifySchema.parse(body);
+
+    const user = await db.user.findUnique({
+      where: { user_id }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if already verified
+    if (user.account_status === 'verified') {
+      return NextResponse.json(
+        { error: "Account already verified" },
+        { status: 400 }
+      );
+    }
+
+    // Check OTP expiry
+    if (user.verification_expiry && new Date() > user.verification_expiry) {
+      return NextResponse.json(
+        { error: "OTP expired. Please request a new one." },
+        { status: 400 }
+      );
+    }
+
+    // Verify OTP
+    if (user.verification_otp !== otp) {
+      return NextResponse.json(
+        { error: "Invalid OTP" },
+        { status: 401 }
+      );
+    }
+
+    // Update user
+    const updatedUser = await db.user.update({
+      where: { user_id },
+      data: {
+        account_status: 'verified',
+        verification_otp: null,
+        verification_expiry: null
+      }
+    });
+
+    // Update inviter's referral counts if applicable
+    if (updatedUser.inviter_id) {
+      await updateReferralCounts(updatedUser.inviter_id);
+    }
+
+    // Generate session token
+    const sessionToken = generateSessionToken();
+    await createSession(updatedUser.user_id, sessionToken);
+
+    // Return success with session cookie
+    const response = NextResponse.json(
+      { success: true, user: updatedUser },
+      { status: 200 }
+    );
+
+    response.cookies.set('session_token', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: '/'
+    });
+
+    return response;
+
+  } catch (error) {
+    console.error("Verification error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+async function updateReferralCounts(inviterId: number) {
+  // Implement 4-level referral count update logic
+  // This would update the inviter's referral counts in the database
+}

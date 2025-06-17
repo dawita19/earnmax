@@ -1,0 +1,54 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { validatePurchaseRequest } from '@/lib/utils/vip-validation';
+
+export async function POST(req: Request) {
+  const session = await getServerSession();
+  const { vipLevel, amount, paymentProof } = await req.json();
+
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const validation = await validatePurchaseRequest(
+    session.user.email,
+    vipLevel,
+    amount
+  );
+
+  if (!validation.valid) {
+    return NextResponse.json({ error: validation.message }, { status: 400 });
+  }
+
+  try {
+    // Create purchase request
+    const request = await prisma.purchaseRequest.create({
+      data: {
+        userId: validation.user.userId,
+        fullName: validation.user.fullName,
+        inviterId: validation.user.inviterId,
+        vipLevel,
+        amount,
+        paymentProofUrl: paymentProof,
+        status: 'pending',
+      },
+    });
+
+    // Update user's temporary VIP status
+    await prisma.user.update({
+      where: { userId: validation.user.userId },
+      data: { pendingVipLevel: vipLevel },
+    });
+
+    return NextResponse.json({
+      message: 'Purchase request submitted',
+      requestId: request.requestId,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to process purchase request' },
+      { status: 500 }
+    );
+  }
+}

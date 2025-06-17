@@ -1,0 +1,104 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { calculateTaskEarnings } from '@/lib/utils/referral-calculations';
+
+export async function POST(req: Request) {
+  const session = await getServerSession();
+  const { taskId } = await req.json();
+
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: {
+      userId: true,
+      vipLevel: true,
+      inviterId: true,
+    },
+  });
+
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  const task = await prisma.dailyTask.findUnique({
+    where: { taskId, userId: user.userId },
+  });
+
+  if (!task || task.isCompleted) {
+    return NextResponse.json(
+      { error: 'Task not available or already completed' },
+      { status: 400 }
+    );
+  }
+
+  try {
+    // Calculate earnings with referral bonuses
+    const earnings = await calculateTaskEarnings(
+      user.userId,
+      user.vipLevel,
+      task.earnings,
+      user.inviterId
+    );
+
+    // Update task as completed
+    await prisma.$transaction([
+      prisma.dailyTask.update({
+        where: { taskId },
+        data: { isCompleted: true, completionDate: new Date() },
+      }),
+      prisma.user.update({
+        where: { userId: user.userId },
+        data: {
+          balance: { increment: earnings.userEarnings },
+          totalEarnings: { increment: earnings.userEarnings },
+        },
+      }),
+      prisma.taskHistory.create({
+        data: {
+          userId: user.userId,
+          taskId,
+          vipLevel: user.vipLevel,
+          taskType: task.taskType,
+          earnings: earnings.userEarnings,
+          completedAt: new Date(),
+        },
+      }),
+      ...earnings.referralUpdates.map(update =>
+        prisma.user.update({
+          where: { userId: update.userId },
+          data: {
+            balance: { increment: update.amount },
+            totalEarnings: { increment: update.amount },
+            totalReferralBonus: { increment: update.amount },
+          },
+        })
+      ),
+      ...earnings.referralUpdates.map(update =>
+        prisma.referralBonuses.create({
+          data: {
+            inviterId: update.userId,
+            inviteeId: user.userId,
+            level: update.level,
+            amount: update.amount,
+            source: 'task',
+            sourceId: taskId,
+          },
+        })
+      ),
+    ]);
+
+    return NextResponse.json({
+      message: 'Task completed successfully',
+      earnings: earnings.userEarnings,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to complete task' },
+      { status: 500 }
+    );
+  }
+}

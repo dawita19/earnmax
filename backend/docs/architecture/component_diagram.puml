@@ -1,0 +1,83 @@
+@startuml EarnMax_Component_Diagram
+
+skinparam componentStyle uml2
+title EarnMax Elite Component Architecture
+
+component "API Gateway" {
+  [Kong] as kong
+  [Rate Limiter] as limiter
+  [Auth Filter] as auth
+}
+
+component "Core Services" {
+  component "User Service" {
+    [Registration] as reg
+    [Authentication] as authn
+    [Profile Mgmt] as profile
+  }
+  
+  component "VIP Service" {
+    [Level Config] as levels
+    [Upgrade Processor] as upgrade
+    [Purchase Handler] as purchase
+  }
+  
+  component "Transaction Service" {
+    [Withdrawal] as withdraw
+    [Deposit] as deposit
+    [Reconciliation] as reconcile
+  }
+  
+  component "Task System" {
+    [Task Generator] as generator
+    [Completion Validator] as validator
+    [Earnings Calculator] as calculator
+  }
+  
+  component "Referral Engine" {
+    [Network Traversal] as traversal
+    [Bonus Calculator] as bonus_calc
+    [Team Analytics] as analytics
+  }
+}
+
+component "Infrastructure" {
+  [PostgreSQL] as pg
+  [Redis] as redis
+  [RabbitMQ] as mq
+}
+
+kong --> reg
+kong --> authn
+kong --> profile
+kong --> levels
+kong --> upgrade
+kong --> purchase
+kong --> withdraw
+kong --> deposit
+kong --> generator
+kong --> validator
+kong --> traversal
+
+reg --> pg
+authn --> redis
+profile --> pg
+levels --> pg
+upgrade --> mq
+purchase --> mq
+withdraw --> pg
+deposit --> pg
+generator --> pg
+validator --> redis
+traversal --> pg
+bonus_calc --> pg
+analytics --> redis
+
+upgrade --> reconcile
+purchase --> reconcile
+withdraw --> reconcile
+
+validator --> calculator
+calculator --> bonus_calc
+
+@enduml

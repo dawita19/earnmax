@@ -1,0 +1,15 @@
+:root {
+  --breakpoint-xs: 0;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1400px;
+}
+
+@custom-media --xs-viewport (min-width: var(--breakpoint-xs));
+@custom-media --sm-viewport (min-width: var(--breakpoint-sm));
+@custom-media --md-viewport (min-width: var(--breakpoint-md));
+@custom-media --lg-viewport (min-width: var(--breakpoint-lg));
+@custom-media --xl-viewport (min-width: var(--breakpoint-xl));
+@custom-media --xxl-viewport (min-width: var(--breakpoint-xxl));

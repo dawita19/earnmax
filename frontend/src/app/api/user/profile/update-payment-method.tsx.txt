@@ -1,0 +1,50 @@
+import { useState } from 'react';
+import { PaymentMethodSelector } from '@/components/payment-method';
+import { api } from '@/lib/axios';
+
+type PaymentMethod = {
+  type: 'bank' | 'mobile_money';
+  details: {
+    bankName?: string;
+    accountNumber?: string;
+    accountName?: string;
+    provider?: string;
+    phoneNumber?: string;
+  };
+};
+
+export const UpdatePaymentMethod = () => {
+  const [method, setMethod] = useState<PaymentMethod | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!method) return;
+    
+    setIsSubmitting(true);
+    try {
+      await api.put('/user/payment-method', method);
+      // Show success notification
+    } catch (error) {
+      // Handle error
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <PaymentMethodSelector 
+        selectedMethod={method} 
+        onChange={setMethod} 
+      />
+      
+      <button 
+        onClick={handleSubmit}
+        disabled={!method || isSubmitting}
+        className="btn-primary"
+      >
+        {isSubmitting ? 'Saving...' : 'Save Payment Method'}
+      </button>
+    </div>
+  );
+};

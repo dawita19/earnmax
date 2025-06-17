@@ -1,0 +1,71 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
+import MetricCard from './MetricCard';
+
+type MetricsData = {
+  totalRevenue: number;
+  totalUsers: number;
+  pendingWithdrawals: number;
+  pendingUpgrades: number;
+};
+
+export default function RealTimeMetrics() {
+  const [metrics, setMetrics] = useState<MetricsData>({
+    totalRevenue: 0,
+    totalUsers: 0,
+    pendingWithdrawals: 0,
+    pendingUpgrades: 0
+  });
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  useEffect(() => {
+    // Initialize socket connection
+    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL!, {
+      path: '/admin-metrics',
+      auth: {
+        token: localStorage.getItem('adminToken')
+      }
+    });
+
+    setSocket(newSocket);
+
+    newSocket.on('metrics_update', (data: MetricsData) => {
+      setMetrics(data);
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
+
+  return (
+    <>
+      <MetricCard 
+        title="Total Revenue" 
+        value={`${metrics.totalRevenue.toLocaleString()} ETB`}
+        icon="dollar"
+        trend="up"
+      />
+      <MetricCard 
+        title="Total Users" 
+        value={metrics.totalUsers.toLocaleString()}
+        icon="users"
+        trend="up"
+      />
+      <MetricCard 
+        title="Pending Withdrawals" 
+        value={metrics.pendingWithdrawals}
+        icon="withdrawal"
+        trend="down"
+      />
+      <MetricCard 
+        title="Pending Upgrades" 
+        value={metrics.pendingUpgrades}
+        icon="upgrade"
+        trend="neutral"
+      />
+    </>
+  );
+}

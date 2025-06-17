@@ -1,0 +1,45 @@
+'use client';
+
+import { Button } from '@/components/ui/button';
+import { formatCurrency } from '@/lib/utils';
+import Link from 'next/link';
+
+export default function AccountBalanceCard({
+  balance,
+  totalEarnings,
+  totalWithdrawn,
+}: {
+  balance: number;
+  totalEarnings: number;
+  totalWithdrawn: number;
+}) {
+  return (
+    <div className="bg-white shadow rounded-lg p-6">
+      <h2 className="text-xl font-semibold mb-4">Account Balance</h2>
+      
+      <div className="space-y-4">
+        <div>
+          <p className="text-sm text-gray-600">Available Balance</p>
+          <p className="text-2xl font-bold">{formatCurrency(balance)}</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm text-gray-600">Total Earnings</p>
+            <p className="font-medium">{formatCurrency(totalEarnings)}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Total Withdrawn</p>
+            <p className="font-medium">{formatCurrency(totalWithdrawn)}</p>
+          </div>
+        </div>
+
+        <div className="pt-4">
+          <Link href="/user/withdraw" className="w-full">
+            <Button className="w-full">Withdraw Funds</Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

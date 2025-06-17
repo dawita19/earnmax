@@ -1,0 +1,22 @@
+// validations/auth.ts
+import { z } from 'zod';
+
+export const loginSchema = z.object({
+  credential: z.string().min(1, 'Email or phone is required'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+export const signupSchema = z.object({
+  fullName: z.string().min(3, 'Name must be at least 3 characters'),
+  phoneNumber: z.string().min(10, 'Valid phone number is required'),
+  email: z.string().email('Invalid email').or(z.literal('')).optional(),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string(),
+  inviteCode: z.string().min(6, 'Invitation code is required'),
+  agreeTerms: z.literal(true, {
+    errorMap: () => ({ message: 'You must accept the terms and conditions' }),
+  }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+});

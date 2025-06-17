@@ -1,0 +1,67 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { OTPInput } from '@/components/ui/form/OTPInput';
+
+interface VerificationStepProps {
+  onSubmit: (otp: string) => void;
+  loading: boolean;
+  phoneNumber: string;
+}
+
+export function VerificationStep({ 
+  onSubmit, 
+  loading, 
+  phoneNumber 
+}: VerificationStepProps) {
+  const [otp, setOtp] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+
+  const handleResendOTP = async () => {
+    setResendLoading(true);
+    try {
+      // Implement resend OTP logic
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setResendSuccess(true);
+      setTimeout(() => setResendSuccess(false), 3000);
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <OTPInput 
+        value={otp}
+        onChange={setOtp}
+        length={6}
+        className="justify-center"
+      />
+      
+      <div className="text-center text-sm text-muted-foreground">
+        {resendSuccess ? (
+          <span className="text-green-600">
+            New OTP sent successfully!
+          </span>
+        ) : (
+          <button
+            onClick={handleResendOTP}
+            disabled={resendLoading}
+            className="text-primary hover:underline"
+          >
+            {resendLoading ? 'Sending...' : 'Resend OTP'}
+          </button>
+        )}
+      </div>
+      
+      <Button
+        type="button"
+        className="w-full"
+        onClick={() => onSubmit(otp)}
+        disabled={otp.length !== 6 || loading}
+      >
+        {loading ? 'Verifying...' : 'Verify Account'}
+      </Button>
+    </div>
+  );
+}

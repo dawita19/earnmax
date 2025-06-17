@@ -1,0 +1,50 @@
+---
+title: User Management System
+description: Comprehensive user administration interface
+---
+
+```jsx live
+const UserManagement = () => {
+  const [users, setUsers] = useState([]);
+  const [filters, setFilters] = useState({
+    vipLevel: null,
+    status: 'active',
+    searchQuery: ''
+  });
+
+  const columns = [
+    { field: 'userId', header: 'ID', sortable: true },
+    { field: 'fullName', header: 'Name', sortable: true },
+    { 
+      field: 'vipLevel', 
+      header: 'VIP Level',
+      render: (level) => <VipBadge level={level} />
+    },
+    { field: 'totalEarnings', header: 'Earnings', sortable: true },
+    {
+      field: 'actions',
+      header: 'Actions',
+      render: (_, user) => (
+        <ActionDropdown
+          actions={[
+            { label: 'View Profile', action: () => viewProfile(user.id) },
+            { label: 'Adjust Balance', action: () => openBalanceModal(user) },
+            { label: 'Suspend', action: () => suspendUser(user.id) }
+          ]}
+        />
+      )
+    }
+  ];
+
+  return (
+    <DataTable
+      columns={columns}
+      data={users}
+      filters={filters}
+      onFilterChange={setFilters}
+      pagination
+      rowsPerPage={25}
+      onRowClick={(user) => navigate(`/users/${user.id}`)}
+    />
+  );
+};

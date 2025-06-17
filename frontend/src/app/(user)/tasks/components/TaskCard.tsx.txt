@@ -1,0 +1,73 @@
+import { VIP_LEVELS } from '@/constants/vip-levels';
+import { CompleteTask } from '@/lib/actions/task.actions';
+import { Task } from '@/types';
+import { Button } from '@nextui-org/react';
+import { useState } from 'react';
+
+interface TaskCardProps {
+  task: Task;
+  vipLevel: number;
+  userId: string;
+  onTaskComplete: (taskId: string, earnings: number) => void;
+}
+
+export const TaskCard = ({ task, vipLevel, userId, onTaskComplete }: TaskCardProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+
+  const handleTaskCompletion = async () => {
+    setIsLoading(true);
+    try {
+      const result = await CompleteTask({
+        taskId: task.id,
+        userId,
+        vipLevel
+      });
+      
+      if (result.success) {
+        onTaskComplete(task.id, result.earnings);
+        setShowCompletionModal(true);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+      <div className="p-5">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {task.title}
+            </h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {task.description}
+            </p>
+          </div>
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+            +{VIP_LEVELS[vipLevel].perTaskEarning} ETB
+          </span>
+        </div>
+        
+        <div className="mt-4 flex justify-end">
+          <Button
+            color="primary"
+            isLoading={isLoading}
+            onPress={handleTaskCompletion}
+            isDisabled={task.isCompleted}
+          >
+            {task.isCompleted ? 'Completed' : 'Complete Task'}
+          </Button>
+        </div>
+      </div>
+
+      <TaskCompleteModal
+        isOpen={showCompletionModal}
+        onClose={() => setShowCompletionModal(false)}
+        earnings={VIP_LEVELS[vipLevel].perTaskEarning}
+        taskName={task.title}
+      />
+    </div>
+  );
+};

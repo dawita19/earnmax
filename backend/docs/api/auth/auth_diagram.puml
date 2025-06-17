@@ -1,0 +1,19 @@
+@startuml Auth Sequence
+actor User
+participant "Mobile App" as App
+participant "Auth Service" as Auth
+database "PostgreSQL" as DB
+
+User -> App: Enters credentials
+App -> Auth: POST /auth/login
+Auth -> DB: Verify credentials
+alt Success
+    DB --> Auth: User data
+    Auth --> App: JWT token
+    App --> User: Grant access
+else Failure
+    DB --> Auth: Error
+    Auth --> App: 401 Unauthorized
+    App --> User: Show error
+end
+@enduml

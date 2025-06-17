@@ -1,0 +1,19 @@
+import { createPaymentAccount } from '@/lib/api/payment-accounts';
+import { AccountForm } from '../components/AccountForm';
+
+export default function NewAccountPage() {
+  async function handleSubmit(formData: FormData) {
+    'use server';
+    await createPaymentAccount(formData);
+  }
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">Add New Payment Account</h1>
+      <AccountForm 
+        onSubmit={handleSubmit} 
+        actionType="create"
+      />
+    </div>
+  );
+}

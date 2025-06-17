@@ -1,0 +1,20 @@
+:root {
+  --z-index-auto: auto;
+  --z-index-0: 0;
+  --z-index-10: 10;
+  --z-index-20: 20;
+  --z-index-30: 30;
+  --z-index-40: 40;
+  --z-index-50: 50;
+  --z-index-100: 100;
+  
+  /* Specific z-indexes */
+  --z-index-dropdown: var(--z-index-10);
+  --z-index-sticky: var(--z-index-20);
+  --z-index-fixed: var(--z-index-30);
+  --z-index-modal-backdrop: var(--z-index-40);
+  --z-index-modal: var(--z-index-50);
+  --z-index-popover: var(--z-index-50);
+  --z-index-tooltip: var(--z-index-100);
+  --z-index-notification: var(--z-index-100);
+}

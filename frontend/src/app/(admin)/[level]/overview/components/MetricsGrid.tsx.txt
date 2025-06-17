@@ -1,0 +1,61 @@
+import React from 'react';
+import { Card, CardContent, CardHeader, Grid, Typography } from '@mui/material';
+import { styled } from '@mui/system';
+import { useAdminDashboard } from '@/hooks/useAdminDashboard';
+
+const MetricCard = styled(Card)(({ theme }) => ({
+  minHeight: 150,
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-5px)',
+    boxShadow: theme.shadows[8],
+  },
+}));
+
+const metrics = [
+  { key: 'totalRevenue', title: 'Total Revenue', icon: '💰', color: '#4caf50' },
+  { key: 'totalUsers', title: 'Total Users', icon: '👥', color: '#2196f3' },
+  { key: 'pendingWithdrawals', title: 'Pending Withdrawals', icon: '⏳', color: '#ff9800' },
+  { key: 'suspendedUsers', title: 'Suspended Users', icon: '🚫', color: '#f44336' },
+  { key: 'pendingPurchases', title: 'Pending Purchases', icon: '🛒', color: '#9c27b0' },
+  { key: 'pendingUpgrades', title: 'Pending Upgrades', icon: '⬆️', color: '#607d8b' },
+];
+
+export const MetricsGrid: React.FC = () => {
+  const { data, isLoading } = useAdminDashboard();
+
+  return (
+    <Grid container spacing={3}>
+      {metrics.map((metric) => (
+        <Grid item xs={12} sm={6} md={4} key={metric.key}>
+          <MetricCard sx={{ borderLeft: `4px solid ${metric.color}` }}>
+            <CardHeader
+              avatar={<span style={{ fontSize: '1.5rem' }}>{metric.icon}</span>}
+              title={
+                <Typography variant="h6" component="div">
+                  {metric.title}
+                </Typography>
+              }
+            />
+            <CardContent>
+              {isLoading ? (
+                <Typography variant="h4" component="div">
+                  Loading...
+                </Typography>
+              ) : (
+                <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
+                  {metric.key.includes('Revenue') 
+                    ? `$${data?.[metric.key]?.toLocaleString() || 0}` 
+                    : data?.[metric.key]?.toLocaleString() || 0}
+                </Typography>
+              )}
+              <Typography variant="caption" color="text.secondary">
+                Updated in real-time
+              </Typography>
+            </CardContent>
+          </MetricCard>
+        </Grid>
+      ))}
+    </Grid>
+  );
+};

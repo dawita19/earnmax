@@ -1,0 +1,26 @@
+---
+name: LoginForm
+route: /components/auth/login-form
+menu: Authentication
+imports:
+  - import LoginForm from '@components/auth/LoginForm'
+---
+
+# Login Form
+
+Secure authentication form for EarnMax Elite users.
+
+## Features
+- Phone/email dual login
+- Password validation
+- IP tracking
+- Failed attempt lockout
+
+## Props
+```tsx
+interface LoginFormProps {
+  initialValues?: { identifier: string };
+  onSuccess: (user: User) => void;
+  onError: (error: AuthError) => void;
+  enableTwoFactor?: boolean;
+}

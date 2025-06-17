@@ -1,0 +1,75 @@
+---
+title: Payment Proof Uploader
+description: Handles secure payment proof submission with OCR preview
+---
+
+```tsx live
+import { useState, useCallback } from 'react';
+
+const PaymentProofUploader = ({ onUpload }: { onUpload: (file: File) => void }) => {
+  const [preview, setPreview] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsLoading(true);
+    
+    // Simulate OCR processing
+    setTimeout(() => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreview(reader.result as string);
+        onUpload(file);
+        setIsLoading(false);
+      };
+      reader.readAsDataURL(file);
+    }, 1500);
+  }, [onUpload]);
+
+  return (
+    <div className="space-y-4">
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+        <input
+          type="file"
+          accept="image/*,.pdf"
+          onChange={handleFileChange}
+          className="hidden"
+          id="payment-proof"
+        />
+        <label
+          htmlFor="payment-proof"
+          className="cursor-pointer flex flex-col items-center justify-center"
+        >
+          {isLoading ? (
+            <div className="animate-pulse">Processing OCR...</div>
+          ) : preview ? (
+            <img src={preview} alt="Payment proof" className="max-h-60 mx-auto" />
+          ) : (
+            <>
+              <UploadIcon className="h-12 w-12 text-gray-400" />
+              <p className="mt-2 text-sm text-gray-600">
+                Upload payment screenshot or PDF
+              </p>
+              <p className="text-xs text-gray-500">
+                Supports JPG, PNG, PDF (Max 5MB)
+              </p>
+            </>
+          )}
+        </label>
+      </div>
+      {preview && (
+        <button
+          onClick={() => setPreview(null)}
+          className="text-sm text-red-600 hover:text-red-800"
+        >
+          Remove and retry
+        </button>
+      )}
+    </div>
+  );
+};
+
+// Example usage
+<PaymentProofUploader onUpload={(file) => console.log('Uploaded:', file.name)} />

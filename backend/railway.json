@@ -1,0 +1,28 @@
+{
+  "build": {
+    "builder": "NIXPACKS",
+    "config": {
+      "startCommand": "npm run start:prod"
+    }
+  },
+  "deploy": {
+    "startCommand": "node dist/main.js",
+    "restartPolicy": {
+      "type": "ALWAYS"
+    }
+  },
+  "env": {
+    "DATABASE_URL": {
+      "description": "PostgreSQL connection URL",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "Secret for JWT token generation",
+      "generator": "secret"
+    },
+    "REDIS_URL": {
+      "description": "Redis connection URL",
+      "required": false
+    }
+  }
+}

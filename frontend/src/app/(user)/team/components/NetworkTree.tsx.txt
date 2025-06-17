@@ -1,0 +1,112 @@
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { useUser } from '@/contexts/user-context';
+import { Badge } from '@/components/ui/badge';
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
+
+interface NetworkMember {
+  id: number;
+  name: string;
+  phone: string;
+  vip_level: number;
+  join_date: string;
+  investment_amount: number;
+}
+
+export function NetworkTree() {
+  const { user } = useUser();
+  const [network, setNetwork] = useState<{
+    level1: NetworkMember[];
+    level2: NetworkMember[];
+    level3: NetworkMember[];
+    level4: NetworkMember[];
+  }>({ level1: [], level2: [], level3: [], level4: [] });
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'level1' | 'level2' | 'level3' | 'level4'>('level1');
+
+  useEffect(() => {
+    const fetchNetwork = async () => {
+      try {
+        const response = await api.get(`/users/${user?.user_id}/network`);
+        setNetwork(response.data);
+      } catch (error) {
+        console.error('Failed to fetch network:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.user_id) {
+      fetchNetwork();
+    }
+  }, [user?.user_id]);
+
+  const currentLevelData = network[activeTab];
+
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      <div className="flex border-b">
+        {['level1', 'level2', 'level3', 'level4'].map((level) => (
+          <button
+            key={level}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              activeTab === level
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-muted-foreground hover:text-primary'
+            }`}
+            onClick={() => setActiveTab(level as any)}
+          >
+            {level.replace('level', 'Level ')}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="p-8 text-center">Loading network data...</div>
+      ) : currentLevelData.length === 0 ? (
+        <div className="p-8 text-center text-muted-foreground">
+          No {activeTab.replace('level', 'Level ')} members found
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead>VIP Level</TableHead>
+              <TableHead>Investment</TableHead>
+              <TableHead>Join Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {currentLevelData.map((member) => (
+              <TableRow key={member.id}>
+                <TableCell>{member.name}</TableCell>
+                <TableCell>{member.phone}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">VIP {member.vip_level}</Badge>
+                </TableCell>
+                <TableCell>
+                  {new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'ETB',
+                  }).format(member.investment_amount)}
+                </TableCell>
+                <TableCell>
+                  {new Date(member.join_date).toLocaleDateString()}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </div>
+  );
+}

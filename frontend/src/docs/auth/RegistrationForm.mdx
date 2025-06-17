@@ -1,0 +1,29 @@
+# RegistrationForm Component
+
+The `RegistrationForm` component handles new user registration with multi-level validation and invitation code verification.
+
+## Props
+
+None. The component manages its own state.
+
+## Features
+
+- Form validation with Yup
+- Phone number or email registration
+- Invitation code verification
+- IP address auto-detection
+- Password strength validation
+- Responsive layout
+
+## Usage
+
+```tsx
+import { RegistrationForm } from '@/features/auth/components/RegistrationForm';
+
+const RegisterPage = () => {
+  return (
+    <Container maxWidth="sm">
+      <RegistrationForm />
+    </Container>
+  );
+};

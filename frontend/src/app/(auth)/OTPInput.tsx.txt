@@ -1,0 +1,69 @@
+// components/auth/OTPInput.tsx
+'use client';
+
+import { useEffect, useRef } from 'react';
+import { Input } from '@/components/ui/input';
+
+interface OTPInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  length?: number;
+}
+
+export default function OTPInput({ value, onChange, length = 6 }: OTPInputProps) {
+  const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+
+  useEffect(() => {
+    if (value.length === length && inputsRef.current[length - 1]) {
+      inputsRef.current[length - 1]?.focus();
+    }
+  }, [value, length]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const newValue = [...value];
+    newValue[index] = e.target.value.slice(-1); // Take only the last character
+    onChange(newValue.join(''));
+
+    // Auto focus next input
+    if (e.target.value && index < length - 1 && inputsRef.current[index + 1]) {
+      inputsRef.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+    if (e.key === 'Backspace' && !value[index] && index > 0 && inputsRef.current[index - 1]) {
+      inputsRef.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasteData = e.clipboardData.getData('text/plain').replace(/\D/g, '').slice(0, length);
+    if (pasteData.length === length) {
+      onChange(pasteData);
+      if (inputsRef.current[pasteData.length - 1]) {
+        inputsRef.current[pasteData.length - 1]?.focus();
+      }
+    }
+  };
+
+  return (
+    <div className="flex justify-center gap-2">
+      {Array.from({ length }).map((_, index) => (
+        <Input
+          key={index}
+          ref={(el) => (inputsRef.current[index] = el)}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={1}
+          value={value[index] || ''}
+          onChange={(e) => handleChange(e, index)}
+          onKeyDown={(e) => handleKeyDown(e, index)}
+          onPaste={handlePaste}
+          className="h-12 w-12 text-center text-xl"
+        />
+      ))}
+    </div>
+  );
+}

@@ -1,0 +1,36 @@
+import { Suspense } from 'react';
+import UserTable from './components/UserTable';
+import UserTableSkeleton from './components/UserTableSkeleton';
+import { fetchFilteredUsers } from '@/lib/data/admin';
+import SearchBar from '@/components/SearchBar';
+
+export default async function UsersPage({
+  searchParams,
+}: {
+  searchParams?: {
+    query?: string;
+    page?: string;
+    vipLevel?: string;
+  };
+}) {
+  const query = searchParams?.query || '';
+  const currentPage = Number(searchParams?.page) || 1;
+  const vipLevel = searchParams?.vipLevel || '';
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">User Management</h1>
+        <SearchBar placeholder="Search users..." />
+      </div>
+
+      <Suspense key={query + currentPage + vipLevel} fallback={<UserTableSkeleton />}>
+        <UserTable 
+          query={query}
+          currentPage={currentPage}
+          vipLevel={vipLevel}
+        />
+      </Suspense>
+    </div>
+  );
+}

@@ -1,0 +1,70 @@
+'use client';
+
+import { useState } from 'react';
+import { updateSecurity } from '@/actions/user';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { format } from 'date-fns';
+import { Loader2 } from 'lucide-react';
+
+export default function SecurityForm({
+  twoFactorEnabled,
+  lastLogin,
+}: {
+  twoFactorEnabled: boolean;
+  lastLogin: string;
+}) {
+  const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(twoFactorEnabled);
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleTwoFactorToggle() {
+    try {
+      setIsLoading(true);
+      const newState = !isTwoFactorEnabled;
+      await updateSecurity({ twoFactorEnabled: newState });
+      setIsTwoFactorEnabled(newState);
+      toast.success(`Two-factor authentication ${newState ? 'enabled' : 'disabled'}`);
+    } catch (error) {
+      toast.error('Failed to update security settings');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <Label htmlFor="two-factor">Two-Factor Authentication</Label>
+          <p className="text-sm text-gray-600">
+            Add an extra layer of security to your account
+          </p>
+        </div>
+        {isLoading ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <Switch
+            id="two-factor"
+            checked={isTwoFactorEnabled}
+            onCheckedChange={handleTwoFactorToggle}
+          />
+        )}
+      </div>
+
+      <div className="space-y-1">
+        <p className="text-sm font-medium">Last Login</p>
+        <p className="text-sm text-gray-600">
+          {format(new Date(lastLogin), 'MMMM d, yyyy \'at\' h:mm a')}
+        </p>
+      </div>
+
+      <div className="pt-4">
+        <Button variant="link" className="text-red-600 p-0">
+          Log out of all devices
+        </Button>
+      </div>
+    </div>
+  );
+}

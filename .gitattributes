@@ -1,0 +1,60 @@
+# Core project files
+*.ts           linguist-language=TypeScript
+*.tsx          linguist-language=TypeScript
+*.js           linguist-language=JavaScript
+*.jsx          linguist-language=JavaScript
+*.json         linguist-language=JSON
+*.md           linguist-language=Markdown
+*.yml          linguist-language=YAML
+*.yaml         linguist-language=YAML
+
+# Binary files (prevent diffing)
+*.png          binary
+*.jpg          binary
+*.jpeg         binary
+*.gif          binary
+*.pdf          binary
+*.zip          binary
+*.cer          binary
+*.pem          binary
+*.key          binary
+
+# Environment files (block from Git)
+.env           binary export-ignore
+*.env.*        binary export-ignore
+.env.local     binary export-ignore
+
+# Configuration protection
+/config/secrets/*.enc binary
+/config/credentials.* binary export-ignore
+
+# Lock files (treat as binary)
+package-lock.json binary
+yarn.lock       binary
+pnpm-lock.yaml  binary
+
+# Line endings normalization
+*.sh           text eol=lf
+*.bash         text eol=lf
+
+# Never modify these files
+*.min.js       -text
+*.min.css      -text
+
+# Database files
+*.sqlite       binary
+*.db           binary
+*.dump         binary
+
+# Payment/account files (block completely)
+/payment_accounts/* linguist-vendored
+/bank_details/* linguist-generated
+/admin_access/* linguist-vendored
+
+# Force Unix line endings for scripts
+*.sh           text eol=lf
+Dockerfile*    text eol=lf
+
+# Documentation exceptions
+/docs/*    text
+/README.md     text

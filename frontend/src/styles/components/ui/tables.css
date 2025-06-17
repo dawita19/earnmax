@@ -1,0 +1,95 @@
+/* Data Tables */
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.table thead {
+  background: #f7fafc;
+}
+
+.table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  padding: 1rem;
+  border-top: 1px solid #e2e8f0;
+  color: #4a5568;
+}
+
+.table tr:hover td {
+  background: #f7fafc;
+}
+
+.table-striped tbody tr:nth-child(odd) {
+  background: #f7fafc;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Compact Table */
+.table-compact th,
+.table-compact td {
+  padding: 0.75rem;
+}
+
+/* Bordered Table */
+.table-bordered {
+  border: 1px solid #e2e8f0;
+}
+
+.table-bordered th,
+.table-bordered td {
+  border: 1px solid #e2e8f0;
+}
+
+/* Status Badges in Tables */
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.pending {
+  background: #fefcbf;
+  color: #744210;
+}
+
+.status-badge.approved {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.status-badge.rejected {
+  background: #fed7d7;
+  color: #975a16;
+}
+
+.status-badge.completed {
+  background: #bee3f8;
+  color: #2c5282;
+}

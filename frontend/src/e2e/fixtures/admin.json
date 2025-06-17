@@ -1,0 +1,14 @@
+{
+  "highLevel": {
+    "username": "admin_higher",
+    "password": "securePass123!",
+    "email": "high.admin@earnmaxelite.com",
+    "level": "high"
+  },
+  "lowLevel": {
+    "username": "admin_lower",
+    "password": "securePass456!",
+    "email": "low.admin@earnmaxelite.com",
+    "level": "low"
+  }
+}

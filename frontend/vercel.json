@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/$1",
+      "continue": true
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_API_URL": "@earnmax-api-url",
+    "NEXT_PUBLIC_ENV": "production"
+  }
+}

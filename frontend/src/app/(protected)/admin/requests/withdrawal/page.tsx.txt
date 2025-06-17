@@ -1,0 +1,35 @@
+import { getWithdrawalRequests } from '@/lib/api/withdrawals';
+import { WithdrawalStatus } from '@prisma/client';
+import WithdrawalTable from './_components/WithdrawalTable';
+import RequestStats from './_components/RequestStats';
+
+export default async function WithdrawalRequestsPage({
+  searchParams,
+}: {
+  searchParams: { status?: WithdrawalStatus; page?: string };
+}) {
+  const status = searchParams.status || 'PENDING';
+  const page = Number(searchParams.page) || 1;
+  
+  const { requests, total } = await getWithdrawalRequests({
+    status,
+    page,
+    limit: 10,
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Withdrawal Requests</h1>
+        <RequestStats />
+      </div>
+
+      <WithdrawalTable 
+        requests={requests} 
+        total={total}
+        currentPage={page}
+        status={status}
+      />
+    </div>
+  );
+}

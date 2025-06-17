@@ -1,0 +1,37 @@
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/axios';
+import { Timeline } from '@/components/timeline';
+
+type TaskHistory = {
+  id: string;
+  taskType: string;
+  earnings: number;
+  completedAt: string;
+  vipLevel: number;
+};
+
+export const TaskHistoryList = () => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['task-history'],
+    queryFn: async () => {
+      const response = await api.get('/tasks/history');
+      return response.data as TaskHistory[];
+    },
+  });
+
+  if (isLoading) return <div>Loading history...</div>;
+  if (error) return <div>Error loading history</div>;
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Task History</h3>
+      <Timeline 
+        items={data?.map(task => ({
+          title: task.taskType,
+          description: `Earned ${task.earnings} (VIP ${task.vipLevel})`,
+          date: new Date(task.completedAt).toLocaleString(),
+        })) || []}
+      />
+    </div>
+  );
+};

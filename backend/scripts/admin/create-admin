@@ -1,0 +1,107 @@
+#!/usr/bin/env ts-node
+import { db } from '../../src/database/connection';
+import { logger } from '../../src/utils/logger';
+import { hashPassword } from '../../src/utils/auth';
+import inquirer from 'inquirer';
+import { AdminLevel } from '../../src/schema';
+
+interface AdminInput {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  adminLevel: AdminLevel;
+}
+
+async function createAdmin() {
+  try {
+    logger.info('Starting admin account creation...');
+
+    const answers: AdminInput = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'username',
+        message: 'Enter admin username:',
+        validate: input => input.length >= 4 || 'Username must be at least 4 characters'
+      },
+      {
+        type: 'input',
+        name: 'email',
+        message: 'Enter admin email:',
+        validate: input => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input) || 'Invalid email format'
+      },
+      {
+        type: 'password',
+        name: 'password',
+        message: 'Enter admin password:',
+        mask: '*',
+        validate: input => input.length >= 8 || 'Password must be at least 8 characters'
+      },
+      {
+        type: 'password',
+        name: 'confirmPassword',
+        message: 'Confirm admin password:',
+        mask: '*',
+        validate: (input, answers) => input === answers.password || 'Passwords do not match'
+      },
+      {
+        type: 'list',
+        name: 'adminLevel',
+        message: 'Select admin level:',
+        choices: Object.values(AdminLevel),
+        default: AdminLevel.LOW
+      }
+    ]);
+
+    const passwordHash = await hashPassword(answers.password);
+    const permissions = getDefaultPermissions(answers.adminLevel);
+
+    await db.insert(admins).values({
+      username: answers.username,
+      email: answers.email,
+      passwordHash,
+      adminLevel: answers.adminLevel,
+      permissions,
+      isActive: true
+    });
+
+    logger.info(`Admin account created successfully for ${answers.username}`);
+    logger.warn('Please ensure the admin enables 2FA on first login!');
+  } catch (error) {
+    if (error.code === '23505') {
+      logger.error('Admin with this username or email already exists');
+    } else {
+      logger.error('Admin creation failed:', error);
+    }
+    process.exit(1);
+  }
+}
+
+function getDefaultPermissions(level: AdminLevel): Record<string, boolean> {
+  const basePermissions = {
+    view_users: true,
+    view_transactions: true,
+    manage_own_account: true
+  };
+
+  if (level === AdminLevel.HIGH) {
+    return {
+      ...basePermissions,
+      manage_users: true,
+      approve_transactions: true,
+      manage_system: true,
+      audit_logs: true,
+      manage_admins: true
+    };
+  }
+
+  return {
+    ...basePermissions,
+    approve_withdrawals: true,
+    approve_purchases: true,
+    approve_upgrades: true,
+    view_reports: true
+  };
+}
+
+createAdmin();

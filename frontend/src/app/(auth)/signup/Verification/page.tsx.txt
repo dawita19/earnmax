@@ -1,0 +1,78 @@
+// app/(auth)/signup/Verification/page.tsx
+'use client';
+
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import OTPInput from '@/components/auth/OTPInput';
+import ResendOTP from './ResendOTP';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/use-toast';
+import { Card, CardHeader, CardContent, CardDescription } from '@/components/ui/card';
+
+export default function VerificationPage() {
+  const searchParams = useSearchParams();
+  const phone = searchParams.get('phone');
+  const [otp, setOtp] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!phone) {
+      router.push('/signup');
+    }
+  }, [phone, router]);
+
+  const handleVerify = async () => {
+    setIsVerifying(true);
+    try {
+      // Simulate verification API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock verification - in real app, check against backend
+      if (otp === '123456') {
+        router.push('/signup/success');
+      } else {
+        throw new Error('Invalid verification code');
+      }
+    } catch (error) {
+      toast({
+        title: 'Verification Failed',
+        description: error instanceof Error ? error.message : 'Invalid code',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  if (!phone) return null;
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <h1 className="text-2xl font-bold">Verify Your Account</h1>
+          <CardDescription>
+            We've sent a 6-digit code to {phone}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <OTPInput value={otp} onChange={setOtp} />
+          
+          <Button 
+            className="w-full" 
+            onClick={handleVerify}
+            disabled={otp.length !== 6 || isVerifying}
+            loading={isVerifying}
+          >
+            Verify Account
+          </Button>
+          
+          <ResendOTP phone={phone} />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

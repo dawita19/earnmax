@@ -1,0 +1,86 @@
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { VIP_LEVELS } from '@/lib/constants';
+import { useUser } from '@/contexts/user-context';
+
+export const LevelBenefits: React.FC = () => {
+  const { user } = useUser();
+  const currentLevel = user?.vip_level !== undefined 
+    ? VIP_LEVELS.find(l => l.level === user.vip_level) 
+    : VIP_LEVELS[0];
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>Current VIP Benefits</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {currentLevel ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">VIP Level</span>
+                <span className="font-mono">Level {currentLevel.level}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Daily Tasks</span>
+                <span>4 tasks/day</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Earnings per Task</span>
+                <span className="font-mono">{currentLevel.perTaskEarning.toLocaleString()} Birr</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Daily Potential</span>
+                <span className="font-mono">{currentLevel.dailyEarning.toLocaleString()} Birr</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Withdrawal Limits</span>
+                <span className="text-right">
+                  Min: {currentLevel.minWithdrawal.toLocaleString()} Birr<br />
+                  Max: {currentLevel.maxTotalWithdrawal.toLocaleString()} Birr
+                </span>
+              </div>
+            </div>
+          ) : (
+            <p>Loading your VIP benefits...</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Referral Benefits</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="rounded-md bg-blue-50 p-3 text-sm">
+              <p className="font-medium">Your Referral Code:</p>
+              <p className="mt-1 font-mono text-lg">{user?.invite_code || 'Loading...'}</p>
+            </div>
+            
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Referral Commission</h4>
+              <ul className="list-disc pl-5 text-sm">
+                <li>1st Level: 20% of their purchases</li>
+                <li>2nd Level: 10% of their purchases</li>
+                <li>3rd Level: 5% of their purchases</li>
+                <li>4th Level: 2% of their purchases</li>
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Task Completion Bonus</h4>
+              <ul className="list-disc pl-5 text-sm">
+                <li>1st Level: 20% of their task earnings</li>
+                <li>2nd Level: 10% of their task earnings</li>
+                <li>3rd Level: 5% of their task earnings</li>
+                <li>4th Level: 2% of their task earnings</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};

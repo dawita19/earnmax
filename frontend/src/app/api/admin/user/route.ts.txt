@@ -1,0 +1,35 @@
+import { NextResponse } from 'next/server';
+import { getUsers, suspendUser } from './actions';
+import { userSchema, suspendUserSchema } from './schemas';
+
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const vipLevel = searchParams.get('vipLevel');
+    
+    const { users, total } = await getUsers({ page, limit, vipLevel });
+    return NextResponse.json({ success: true, data: users, total });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const validated = suspendUserSchema.parse(body);
+    
+    const result = await suspendUser(validated.userId, validated.reason);
+    return NextResponse.json({ success: true, data: result });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 400 }
+    );
+  }
+}

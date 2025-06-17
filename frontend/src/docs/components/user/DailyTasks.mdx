@@ -1,0 +1,91 @@
+---
+title: Daily Tasks Component
+description: VIP-level specific tasks with completion tracking
+---
+
+```tsx live
+interface DailyTask {
+  id: string;
+  title: string;
+  description: string;
+  reward: number;
+  completed: boolean;
+}
+
+const DailyTasks = ({ tasks, vipLevel }: { tasks: DailyTask[]; vipLevel: number }) => {
+  const [currentTasks, setTasks] = useState(tasks);
+
+  const completeTask = (taskId: string) => {
+    setTasks(prev =>
+      prev.map(task =>
+        task.id === taskId ? { ...task, completed: true } : task
+      )
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-medium">Daily Tasks (VIP {vipLevel})</h3>
+        <span className="text-sm text-gray-500">
+          Resets in 12h 24m
+        </span>
+      </div>
+      
+      <div className="space-y-3">
+        {currentTasks.map(task => (
+          <div
+            key={task.id}
+            className={`p-4 border rounded-lg ${
+              task.completed ? 'border-green-200 bg-green-50' : 'border-gray-200'
+            }`}
+          >
+            <div className="flex justify-between">
+              <div>
+                <h4 className="font-medium">{task.title}</h4>
+                <p className="text-sm text-gray-600">{task.description}</p>
+              </div>
+              <div className="text-right">
+                <div className="font-medium text-green-600">
+                  +{task.reward} ETB
+                </div>
+                <button
+                  onClick={() => !task.completed && completeTask(task.id)}
+                  disabled={task.completed}
+                  className={`mt-1 text-xs ${
+                    task.completed
+                      ? 'text-green-600'
+                      : 'text-blue-600 hover:text-blue-800'
+                  }`}
+                >
+                  {task.completed ? 'Completed' : 'Complete Task'}
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Example usage
+<DailyTasks
+  vipLevel={3}
+  tasks={[
+    {
+      id: '1',
+      title: 'Analyze Market Prices',
+      description: 'Compare 3 product prices in your area',
+      reward: 50,
+      completed: false
+    },
+    {
+      id: '2',
+      title: 'Wishlist Item',
+      description: 'Add a product to your wishlist',
+      reward: 50,
+      completed: true
+    }
+  ]}
+/>

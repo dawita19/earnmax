@@ -1,0 +1,9 @@
+POST https://api.earnmaxelite.com/admin/v1/users/67890/suspend
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6MTIzLCJsZXZlbCI6ImhpZ2gifQ.def456
+Content-Type: application/json
+
+{
+  "reason": "Suspected multi-accounting",
+  "duration_days": 30,
+  "notes": "IP 192.168.1.100 matches existing user"
+}

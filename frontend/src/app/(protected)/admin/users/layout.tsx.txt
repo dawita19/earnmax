@@ -1,0 +1,29 @@
+import { AdminLayout } from '@/components/layouts/AdminLayout';
+import { auth } from '@/auth';
+
+export default async function AdminUsersLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await auth();
+  
+  if (!session?.user?.isAdmin) {
+    throw new Error('Unauthorized access');
+  }
+
+  return (
+    <AdminLayout 
+      title="User Management"
+      description="Manage all platform users and their VIP levels"
+    >
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">User Management</h1>
+          <UserSearch />
+        </div>
+        {children}
+      </div>
+    </AdminLayout>
+  );
+}

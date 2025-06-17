@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "public": false,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/$1",
+      "methods": ["GET"]
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "https://your-railway-backend-url.railway.app/api/$1",
+      "methods": ["POST", "PUT", "DELETE", "PATCH"]
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_API_BASE_URL": "https://your-railway-backend-url.railway.app",
+    "NEXT_PUBLIC_WS_URL": "wss://your-railway-backend-url.railway.app"
+  }
+}

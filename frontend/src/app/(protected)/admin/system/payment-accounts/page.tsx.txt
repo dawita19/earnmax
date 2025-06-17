@@ -1,0 +1,22 @@
+import { getPaymentAccounts } from '@/lib/api/payment-accounts';
+import { AccountTable } from './components/AccountTable';
+
+export default async function PaymentAccountsPage() {
+  const accounts = await getPaymentAccounts();
+  
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Payment Accounts</h1>
+        <a 
+          href="/protected/admin/system/payment-accounts/new" 
+          className="btn btn-primary"
+        >
+          Add New Account
+        </a>
+      </div>
+      
+      <AccountTable accounts={accounts} />
+    </div>
+  );
+}

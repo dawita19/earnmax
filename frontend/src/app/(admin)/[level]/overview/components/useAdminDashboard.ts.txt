@@ -1,0 +1,118 @@
+import { useEffect, useState } from 'react';
+import { useSocket } from './useSocket';
+
+interface AdminDashboardData {
+  totalRevenue: number;
+  totalUsers: number;
+  pendingWithdrawals: number;
+  suspendedUsers: number;
+  pendingPurchases: number;
+  pendingUpgrades: number;
+  vipDistribution: Record<string, { userCount: number; totalRevenue: number }>;
+}
+
+export const useAdminDashboard = () => {
+  const [data, setData] = useState<AdminDashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/admin/dashboard');
+        const result = await response.json();
+        setData(result.data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Set up socket listeners for real-time updates
+    const handleStatsUpdate = (update: Partial<AdminDashboardData>) => {
+      setData((prev) => (prev ? { ...prev, ...update } : null));
+    };
+
+    socket?.on('dashboardUpdate', handleStatsUpdate);
+
+    return () => {
+      socket?.off('dashboardUpdate', handleStatsUpdate);
+    };
+  }, [socket]);
+
+  return { data, isLoading, error };
+};
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { Box, Typography } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
+
+interface WelcomeAnimationProps {
+  userType: 'boss' | 'management';
+}
+
+export const WelcomeAnimation: React.FC<WelcomeAnimationProps> = ({ userType }) => {
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [isFirstLogin, setIsFirstLogin] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !localStorage.getItem('hasLoggedInBefore');
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    if (isFirstLogin) {
+      const timer = setTimeout(() => {
+        setShowWelcome(false);
+        localStorage.setItem('hasLoggedInBefore', 'true');
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    } else {
+      setShowWelcome(false);
+    }
+  }, [isFirstLogin]);
+
+  const greeting = userType === 'boss' 
+    ? 'Welcome boss' 
+    : 'Welcome management team';
+
+  return (
+    <AnimatePresence>
+      {showWelcome && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.5 }}
+          style={{
+            position: 'relative',
+            zIndex: 1000,
+            width: '100%',
+            textAlign: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              backgroundColor: 'primary.main',
+              color: 'primary.contrastText',
+              p: 2,
+              borderRadius: 2,
+              boxShadow: 3,
+            }}
+          >
+            <Typography variant="h4" component="div">
+              {greeting}
+            </Typography>
+          </Box>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};

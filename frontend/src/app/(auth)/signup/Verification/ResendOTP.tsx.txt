@@ -1,0 +1,55 @@
+// app/(auth)/signup/Verification/ResendOTP.tsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
+
+export default function ResendOTP({ phone }: { phone: string }) {
+  const [countdown, setCountdown] = useState(30);
+  const [canResend, setCanResend] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setCanResend(true);
+    }
+  }, [countdown]);
+
+  const handleResend = async () => {
+    try {
+      // Simulate resend API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setCountdown(30);
+      setCanResend(false);
+      toast({
+        title: 'Code Resent',
+        description: `A new verification code has been sent to ${phone}`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Failed to Resend',
+        description: 'Please try again later',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  return (
+    <div className="text-center text-sm">
+      Didn't receive the code?{' '}
+      {canResend ? (
+        <Button variant="link" className="p-0 h-auto" onClick={handleResend}>
+          Resend code
+        </Button>
+      ) : (
+        <span className="text-muted-foreground">
+          Resend in {countdown}s
+        </span>
+      )}
+    </div>
+  );
+}

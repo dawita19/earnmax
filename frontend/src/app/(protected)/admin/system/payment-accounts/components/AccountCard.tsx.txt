@@ -1,0 +1,29 @@
+'use client';
+
+import { PaymentAccount } from '@/types';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+
+type AccountCardProps = {
+  account: PaymentAccount;
+};
+
+export function AccountCard({ account }: AccountCardProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{account.accountName}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <p>
+          <span className="font-medium">Type:</span> {account.accountType}
+        </p>
+        <p>
+          <span className="font-medium">Number:</span> {account.accountNumber}
+        </p>
+        <p>
+          <span className="font-medium">Holder:</span> {account.accountHolder}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}

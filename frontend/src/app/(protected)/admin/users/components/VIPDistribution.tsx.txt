@@ -1,0 +1,33 @@
+'use client';
+
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { useAdminDashboard } from '@/hooks/useAdminDashboard';
+
+export default function VIPDistribution() {
+  const { vipDistribution } = useAdminDashboard();
+
+  const data = Object.entries(vipDistribution).map(([level, count]) => ({
+    name: `VIP ${level}`,
+    users: count,
+  }));
+
+  return (
+    <div className="bg-white p-6 rounded-lg shadow">
+      <h3 className="font-semibold text-lg mb-4">VIP Level Distribution</h3>
+      <div className="h-80">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data}>
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Bar 
+              dataKey="users" 
+              fill="#4f46e5" 
+              radius={[4, 4, 0, 0]} 
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}

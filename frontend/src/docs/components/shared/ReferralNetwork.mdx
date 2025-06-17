@@ -1,0 +1,46 @@
+---
+title: Referral Network Component
+description: Shows 4-level deep referral structure with earnings
+---
+
+```tsx live
+interface ReferralTier {
+  level: number;
+  count: number;
+  earnings: number;
+}
+
+const ReferralNetwork = ({ tiers }: { tiers: ReferralTier[] }) => {
+  const levelNames = ['1st Level', '2nd Level', '3rd Level', '4th Level'];
+  const colors = ['bg-blue-50', 'bg-purple-50', 'bg-green-50', 'bg-yellow-50'];
+
+  return (
+    <div className="space-y-4">
+      <h3 className="font-medium">Your Referral Network</h3>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {tiers.map((tier, index) => (
+          <div key={tier.level} className={`p-4 rounded-lg ${colors[index]}`}>
+            <div className="font-medium">{levelNames[index]}</div>
+            <div className="text-2xl font-bold">{tier.count}</div>
+            <div className="text-sm text-gray-600">
+              Earnings: {tier.earnings.toLocaleString()} ETB
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="text-xs text-gray-500">
+        * Referral bonuses: 20% (1st), 10% (2nd), 5% (3rd), 2% (4th)
+      </div>
+    </div>
+  );
+};
+
+// Example usage
+<ReferralNetwork
+  tiers={[
+    { level: 1, count: 12, earnings: 2400 },
+    { level: 2, count: 45, earnings: 1350 },
+    { level: 3, count: 112, earnings: 1680 },
+    { level: 4, count: 320, earnings: 1920 }
+  ]}
+/>

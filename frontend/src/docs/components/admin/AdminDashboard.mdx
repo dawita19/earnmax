@@ -1,0 +1,45 @@
+---
+title: Admin Dashboard
+description: Real-time management interface for high and low level admins
+---
+
+```jsx live
+// Example of the metrics dashboard component
+const AdminDashboard = ({ adminLevel }) => {
+  const [metrics, setMetrics] = useState({
+    totalRevenue: 0,
+    activeUsers: 0,
+    pendingRequests: 0
+  });
+
+  // WebSocket connection for real-time updates
+  useEffect(() => {
+    const ws = new WebSocket('wss://api.earnmaxelite.com/realtime');
+    ws.onmessage = (event) => {
+      setMetrics(JSON.parse(event.data));
+    };
+    return () => ws.close();
+  }, []);
+
+  return (
+    <div className="dashboard-grid">
+      <MetricCard 
+        title="Total Revenue" 
+        value={`${metrics.totalRevenue} ETB`}
+        icon={<RevenueIcon />}
+      />
+      <MetricCard 
+        title="Active Users" 
+        value={metrics.activeUsers}
+        icon={<UsersIcon />} 
+      />
+      {adminLevel === 'high' && (
+        <RequestSummary 
+          purchaseRequests={metrics.pendingPurchases}
+          upgradeRequests={metrics.pendingUpgrades}
+          withdrawalRequests={metrics.pendingWithdrawals}
+        />
+      )}
+    </div>
+  );
+};

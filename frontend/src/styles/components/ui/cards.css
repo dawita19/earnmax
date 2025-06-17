@@ -1,0 +1,121 @@
+/* Card Components */
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f7fafc;
+}
+
+/* Stats Card */
+.stats-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.stats-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.stats-label {
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+.stats-change {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.stats-change.positive {
+  color: #38a169;
+}
+
+.stats-change.negative {
+  color: #f56565;
+}
+
+/* VIP Level Card */
+.vip-card {
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.vip-card.featured {
+  border-color: #d69e2e;
+  transform: scale(1.02);
+}
+
+.vip-card-header {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.vip-card.featured .vip-card-header {
+  background: linear-gradient(135deg, #d69e2e 0%, #b7791f 100%);
+}
+
+.vip-level {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.vip-price {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.vip-features {
+  padding: 1.5rem;
+}
+
+.vip-feature {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.vip-feature:last-child {
+  margin-bottom: 0;
+}
+
+.vip-feature-icon {
+  color: #48bb78;
+  margin-right: 0.75rem;
+}

@@ -1,0 +1,9 @@
+POST https://api.earnmaxelite.com/admin/v1/purchases/54321/verify
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6MTIzLCJsZXZlbCI6ImxvdyJ9.ghi789
+Content-Type: application/json
+
+{
+  "status": "approved",
+  "verification_method": "ocr+manual",
+  "admin_notes": "CBE receipt #789654 verified"
+}

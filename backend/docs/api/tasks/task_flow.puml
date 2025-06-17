@@ -1,0 +1,16 @@
+@startuml Task Processing
+participant "User" as User
+participant "Task Service" as Task
+participant "Referral Engine" as Referral
+database "Redis" as Cache
+database "PostgreSQL" as DB
+
+User -> Task: Completes task (POST /tasks/complete)
+Task -> Cache: Verify task availability
+Cache --> Task: Valid task
+Task -> DB: Record completion
+Task -> Referral: Trigger bonus calculation
+Referral -> DB: 4-level referral update
+DB --> Task: Success
+Task --> User: 200 OK + new balance
+@enduml

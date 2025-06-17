@@ -1,0 +1,33 @@
+import { RealTimeStats } from './components/RealTimeStats';
+import { SuspensionOverview } from './components/SuspensionsManager';
+import { AuditLogOverview } from './components/AuditLog';
+
+export default function SystemPage() {
+  return (
+    <div className="space-y-8">
+      <h1 className="text-3xl font-bold text-gray-900">System Dashboard</h1>
+      
+      <section>
+        <h2 className="text-xl font-semibold mb-4">Real-Time Metrics</h2>
+        <RealTimeStats />
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section>
+          <h2 className="text-xl font-semibold mb-4">Suspension Management</h2>
+          <SuspensionOverview />
+        </section>
+
+        <section>
+          <h2 className="text-xl font-semibold mb-4">Audit Logs</h2>
+          <AuditLogOverview />
+        </section>
+      </div>
+
+      <section>
+        <h2 className="text-xl font-semibold mb-4">System Configuration</h2>
+        <ConfigForm />
+      </section>
+    </div>
+  );
+}

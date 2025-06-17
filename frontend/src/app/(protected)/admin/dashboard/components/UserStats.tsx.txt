@@ -1,0 +1,44 @@
+import { Doughnut } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { useAdminData } from '@/hooks/useAdminData';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+export default function UserStats() {
+  const { userDistribution, isLoading } = useAdminData('user-distribution');
+
+  const data = {
+    labels: userDistribution?.levels || [],
+    datasets: [
+      {
+        label: 'Users by VIP Level',
+        data: userDistribution?.counts || [],
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(54, 162, 235, 0.6)',
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(153, 102, 255, 0.6)',
+          'rgba(255, 159, 64, 0.6)',
+          'rgba(255, 99, 132, 0.6)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  return (
+    <div className="bg-white p-4 rounded-lg shadow-md h-80">
+      <h3 className="text-lg font-semibold mb-4">User Distribution</h3>
+      {isLoading ? (
+        <div className="h-64 bg-gray-100 rounded-md animate-pulse" />
+      ) : (
+        <Doughnut data={data} />
+      )}
+    </div>
+  );
+}

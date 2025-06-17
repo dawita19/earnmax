@@ -1,0 +1,134 @@
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useUser } from '@/contexts/user-context';
+import { VIP_LEVELS } from '@/lib/constants';
+import { Icons } from '@/components/icons';
+import { formatCurrency } from '@/lib/utils';
+
+interface UpgradeModalProps {
+  level: number;
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (proof: File | null, rechargeAmount: number) => Promise<void>;
+}
+
+export const UpgradeModal: React.FC<UpgradeModalProps> = ({ level, open, onClose, onSubmit }) => {
+  const [paymentProof, setPaymentProof] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useUser();
+
+  const currentVip = user?.vip_level !== undefined ? VIP_LEVELS.find(l => l.level === user.vip_level) : null;
+  const targetVip = VIP_LEVELS.find(l => l.level === level);
+
+  if (!currentVip || !targetVip || !user) return null;
+
+  const difference = targetVip.investmentAmount - currentVip.investmentAmount;
+  const balanceCoverage = Math.min(difference, user.balance);
+  const rechargeNeeded = difference - balanceCoverage;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await onSubmit(rechargeNeeded > 0 ? paymentProof : null, rechargeNeeded);
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Upgrade to VIP Level {level}</DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Current VIP</Label>
+              <Input value={`Level ${currentVip.level}`} readOnly />
+            </div>
+            <div>
+              <Label>New VIP</Label>
+              <Input value={`Level ${targetVip.level}`} readOnly />
+            </div>
+          </div>
+
+          <div>
+            <Label>Upgrade Details</Label>
+            <div className="mt-1 space-y-2 rounded-md bg-gray-50 p-3 text-sm">
+              <div className="flex justify-between">
+                <span>Investment Difference:</span>
+                <strong>{formatCurrency(difference)} Birr</strong>
+              </div>
+              <div className="flex justify-between">
+                <span>Covered by Balance:</span>
+                <strong>{formatCurrency(balanceCoverage)} Birr</strong>
+              </div>
+              {rechargeNeeded > 0 && (
+                <div className="flex justify-between">
+                  <span>Additional Recharge Needed:</span>
+                  <strong className="text-red-600">{formatCurrency(rechargeNeeded)} Birr</strong>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {rechargeNeeded > 0 && (
+            <>
+              <div>
+                <Label>Payment Instructions</Label>
+                <div className="mt-1 rounded-md bg-blue-50 p-3 text-sm">
+                  <p>Please transfer <strong>{formatCurrency(rechargeNeeded)} Birr</strong> to:</p>
+                  <p className="font-mono mt-1">Bank: Commercial Bank of Ethiopia</p>
+                  <p className="font-mono">Account: 100034567890</p>
+                  <p className="font-mono">Name: EarnMax Elite</p>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="paymentProof">Recharge Proof</Label>
+                <Input
+                  id="paymentProof"
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={(e) => setPaymentProof(e.target.files?.[0] || null)}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Required for recharge amount verification
+                </p>
+              </div>
+            </>
+          )}
+
+          <div className="rounded-md bg-green-50 p-3 text-sm">
+            <p className="font-medium">After Upgrade Benefits:</p>
+            <ul className="mt-1 list-disc pl-5">
+              <li>Daily earnings: {formatCurrency(targetVip.dailyEarning)} Birr</li>
+              <li>Max withdrawal: {formatCurrency(targetVip.maxTotalWithdrawal)} Birr</li>
+              <li>Access to Level {level} tasks</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit}
+            disabled={rechargeNeeded > 0 && !paymentProof || isSubmitting}
+          >
+            {isSubmitting && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+            Confirm Upgrade
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};

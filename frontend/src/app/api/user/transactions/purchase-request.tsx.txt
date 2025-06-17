@@ -1,0 +1,71 @@
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/axios';
+import { DataTable } from '@/components/data-table';
+import { ColumnDef } from '@tanstack/react-table';
+
+type PurchaseRequest = {
+  id: string;
+  userId: string;
+  fullName: string;
+  vipLevel: number;
+  amount: number;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+};
+
+const columns: ColumnDef<PurchaseRequest>[] = [
+  { accessorKey: 'fullName', header: 'User' },
+  { accessorKey: 'vipLevel', header: 'VIP Level' },
+  { accessorKey: 'amount', header: 'Amount' },
+  { accessorKey: 'createdAt', header: 'Date' },
+  { accessorKey: 'status', header: 'Status' },
+  {
+    id: 'actions',
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <button 
+          onClick={() => handleApprove(row.original.id)}
+          className="btn-success"
+        >
+          Approve
+        </button>
+        <button 
+          onClick={() => handleReject(row.original.id)}
+          className="btn-danger"
+        >
+          Reject
+        </button>
+      </div>
+    ),
+  },
+];
+
+export const PurchaseRequestsTable = () => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['purchase-requests'],
+    queryFn: async () => {
+      const response = await api.get('/transactions/purchase-requests');
+      return response.data;
+    },
+  });
+
+  const handleApprove = async (requestId: string) => {
+    await api.put(`/transactions/purchase-requests/${requestId}/approve`);
+    // Invalidate queries or update local state
+  };
+
+  const handleReject = async (requestId: string) => {
+    await api.put(`/transactions/purchase-requests/${requestId}/reject`);
+    // Invalidate queries or update local state
+  };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading requests</div>;
+
+  return (
+    <div className="container mx-auto py-4">
+      <h2 className="text-xl font-bold mb-4">Purchase Requests</h2>
+      <DataTable columns={columns} data={data} />
+    </div>
+  );
+};

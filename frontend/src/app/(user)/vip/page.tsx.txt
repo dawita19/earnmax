@@ -1,0 +1,101 @@
+import React, { useState } from 'react';
+import { VipTable } from './components/VipTable';
+import { PurchaseModal } from './components/PurchaseModal';
+import { UpgradeModal } from './components/UpgradeModal';
+import { LevelBenefits } from './components/LevelBenefits';
+import { useUser } from '@/contexts/user-context';
+import { VIP_LEVELS } from '@/lib/constants';
+import { api } from '@/lib/api';
+import { useToast } from '@/components/ui/use-toast';
+
+export default function VipPage() {
+  const { user, refreshUser } = useUser();
+  const { toast } = useToast();
+  const [purchaseLevel, setPurchaseLevel] = useState<number | null>(null);
+  const [upgradeLevel, setUpgradeLevel] = useState<number | null>(null);
+
+  const handlePurchase = async (proof: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('level', purchaseLevel!.toString());
+      formData.append('proof', proof);
+      
+      await api.post('/vip/purchase', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      toast({
+        title: 'Purchase Request Submitted',
+        description: 'Your VIP purchase is under review. Please wait 24-48 hours.',
+      });
+      refreshUser();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to submit purchase request',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleUpgrade = async (proof: File | null, rechargeAmount: number) => {
+    try {
+      const formData = new FormData();
+      formData.append('level', upgradeLevel!.toString());
+      if (proof) formData.append('proof', proof);
+      formData.append('rechargeAmount', rechargeAmount.toString());
+      
+      await api.post('/vip/upgrade', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      toast({
+        title: 'Upgrade Request Submitted',
+        description: rechargeAmount > 0 
+          ? 'Your VIP upgrade with recharge is under review.' 
+          : 'Your VIP upgrade was successful!',
+      });
+      refreshUser();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to process upgrade',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">VIP Levels</h1>
+        {user?.vip_level !== undefined && (
+          <div className="rounded-full bg-primary px-4 py-1 text-sm text-primary-foreground">
+            Current: VIP Level {user.vip_level}
+          </div>
+        )}
+      </div>
+
+      <LevelBenefits />
+
+      <VipTable
+        onPurchase={setPurchaseLevel}
+        onUpgrade={setUpgradeLevel}
+      />
+
+      <PurchaseModal
+        level={purchaseLevel!}
+        open={purchaseLevel !== null}
+        onClose={() => setPurchaseLevel(null)}
+        onSubmit={handlePurchase}
+      />
+
+      <UpgradeModal
+        level={upgradeLevel!}
+        open={upgradeLevel !== null}
+        onClose={() => setUpgradeLevel(null)}
+        onSubmit={handleUpgrade}
+      />
+    </div>
+  );
+}

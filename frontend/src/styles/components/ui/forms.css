@@ -1,0 +1,156 @@
+/* Form Elements */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
+.form-control::placeholder {
+  color: #a0aec0;
+}
+
+.form-control.is-invalid {
+  border-color: #f56565;
+}
+
+.form-control.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.2);
+}
+
+.form-text {
+  font-size: 0.875rem;
+  color: #718096;
+  margin-top: 0.25rem;
+}
+
+.form-text.invalid-feedback {
+  color: #f56565;
+}
+
+/* Checkboxes and Radios */
+.form-check {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.form-check-input {
+  margin-right: 0.5rem;
+}
+
+.form-check-label {
+  user-select: none;
+}
+
+/* Input Groups */
+.input-group {
+  display: flex;
+}
+
+.input-group .form-control:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-group .form-control:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.input-group-prepend,
+.input-group-append {
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  background: #edf2f7;
+  border: 1px solid #e2e8f0;
+}
+
+.input-group-prepend {
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+}
+
+.input-group-append {
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+}
+
+/* Select Dropdowns */
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper::after {
+  content: "▼";
+  font-size: 0.75rem;
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #718096;
+}
+
+.form-select {
+  appearance: none;
+  padding-right: 2.5rem;
+}
+
+/* File Inputs */
+.form-file {
+  position: relative;
+}
+
+.form-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.form-file-label {
+  display: block;
+  padding: 0.75rem;
+  border: 1px dashed #e2e8f0;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-file-label:hover {
+  border-color: #4299e1;
+  background: #ebf8ff;
+}
+
+.form-file-preview {
+  margin-top: 1rem;
+  max-width: 100%;
+  border-radius: 6px;
+}

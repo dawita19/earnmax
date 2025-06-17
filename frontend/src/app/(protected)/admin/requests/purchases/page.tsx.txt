@@ -1,0 +1,38 @@
+import { getPurchaseRequests } from '@/lib/api/purchases';
+import PurchaseRequestCard from './ReviewCard';
+import { PurchaseStatus } from '@prisma/client';
+import Pagination from '@/components/Pagination';
+
+export default async function PurchaseRequestsPage({
+  searchParams,
+}: {
+  searchParams: { status?: PurchaseStatus; page?: string };
+}) {
+  const status = searchParams.status || 'PENDING';
+  const page = Number(searchParams.page) || 1;
+  
+  const { requests, total } = await getPurchaseRequests({
+    status,
+    page,
+    limit: 8,
+  });
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold">Purchase Requests</h1>
+      
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {requests.map((request) => (
+          <PurchaseRequestCard key={request.id} request={request} />
+        ))}
+      </div>
+
+      <Pagination
+        totalItems={total}
+        currentPage={page}
+        itemsPerPage={8}
+        queryParam="page"
+      />
+    </div>
+  );
+}

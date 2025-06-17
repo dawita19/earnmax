@@ -1,0 +1,62 @@
+import { NextResponse } from 'next/server';
+import { Redis } from '@upstash/redis';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+interface RateLimitConfig {
+  interval: number;
+  uniqueTokenPerInterval: number;
+}
+
+export const rateLimit = (config: RateLimitConfig) => {
+  return {
+    check: async (
+      req: NextRequest,
+      limit: number,
+      keyPrefix: string
+    ): Promise<NextResponse | { status: number }> => {
+      const ip = req.ip ?? '127.0.0.1';
+      const key = `rate_limit:${keyPrefix}:${ip}`;
+      
+      try {
+        const current = await redis.incr(key);
+        if (current === 1) {
+          await redis.expire(key, config.interval / 1000);
+        }
+
+        if (current > limit) {
+          return NextResponse.json(
+            { error: 'Too many requests' },
+            { status: 429 }
+          );
+        }
+
+        return { status: 200 };
+      } catch (err) {
+        console.error('Rate limit error:', err);
+        return { status: 200 }; // Fail open
+      }
+    }
+  };
+};
+
+// IP-based blocking for admin routes
+export const adminIPWhitelist = async (req: NextRequest) => {
+  const ADMIN_IPS = process.env.ADMIN_IPS?.split(',') || [];
+  
+  if (process.env.NODE_ENV === 'production') {
+    const ip = req.ip ?? req.headers.get('x-real-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0];
+    
+    if (!ip || !ADMIN_IPS.includes(ip)) {
+      return NextResponse.json(
+        { error: 'Access denied' },
+        { status: 403 }
+      );
+    }
+  }
+  
+  return NextResponse.next();
+};

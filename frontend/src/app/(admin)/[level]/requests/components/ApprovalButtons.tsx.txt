@@ -1,0 +1,101 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
+import { approveRequest, rejectRequest } from '@/lib/api/admin-requests';
+
+interface ApprovalButtonsProps {
+  requestId: string;
+  requestType: 'purchase' | 'upgrade' | 'withdrawal';
+  onStatusChange: () => void;
+  adminLevel: 'high' | 'low';
+}
+
+export function ApprovalButtons({
+  requestId,
+  requestType,
+  onStatusChange,
+  adminLevel,
+}: ApprovalButtonsProps) {
+  const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [adminNotes, setAdminNotes] = useState('');
+
+  const handleApproval = async () => {
+    setIsProcessing(true);
+    try {
+      await approveRequest(requestId, requestType, adminNotes, adminLevel);
+      toast({
+        title: 'Request Approved',
+        description: `The ${requestType} request has been approved successfully.`,
+      });
+      onStatusChange();
+    } catch (error) {
+      toast({
+        title: 'Approval Failed',
+        description: error instanceof Error ? error.message : 'An error occurred',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleRejection = async () => {
+    if (!adminNotes.trim()) {
+      toast({
+        title: 'Notes Required',
+        description: 'Please provide notes for rejection',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      await rejectRequest(requestId, requestType, adminNotes, adminLevel);
+      toast({
+        title: 'Request Rejected',
+        description: `The ${requestType} request has been rejected.`,
+      });
+      onStatusChange();
+    } catch (error) {
+      toast({
+        title: 'Rejection Failed',
+        description: error instanceof Error ? error.message : 'An error occurred',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex gap-2">
+        <Button
+          variant="success"
+          size="sm"
+          onClick={handleApproval}
+          disabled={isProcessing}
+        >
+          {isProcessing ? 'Processing...' : 'Approve'}
+        </Button>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={handleRejection}
+          disabled={isProcessing}
+        >
+          {isProcessing ? 'Processing...' : 'Reject'}
+        </Button>
+      </div>
+      <textarea
+        className="text-sm p-2 border rounded w-full"
+        placeholder="Admin notes..."
+        value={adminNotes}
+        onChange={(e) => setAdminNotes(e.target.value)}
+        rows={2}
+      />
+    </div>
+  );
+}

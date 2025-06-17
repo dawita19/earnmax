@@ -1,0 +1,27 @@
+// app/(protected)/admin/system/statistics/page.tsx
+import { RealTimeStats } from '@/components/admin/RealTimeStats';
+import { Suspense } from 'react';
+import { AdminAuthGuard } from '@/lib/auth';
+
+export default function StatisticsPage() {
+  return (
+    <AdminAuthGuard level="high">
+      <div className="p-6">
+        <h1 className="text-3xl font-bold mb-6">System Statistics</h1>
+        <Suspense fallback={<StatsSkeleton />}>
+          <RealTimeStats />
+        </Suspense>
+      </div>
+    </AdminAuthGuard>
+  );
+}
+
+function StatsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="bg-gray-100 rounded-lg p-4 h-32 animate-pulse"></div>
+      ))}
+    </div>
+  );
+}

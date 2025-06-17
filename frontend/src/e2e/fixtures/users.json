@@ -1,0 +1,15 @@
+{
+  "vip0": {
+    "phone": "+251911223344",
+    "password": "userPass123",
+    "inviteCode": "ABCD1234",
+    "vipLevel": 0
+  },
+  "vip5": {
+    "phone": "+251922334455",
+    "password": "userPass456",
+    "inviteCode": "EFGH5678",
+    "vipLevel": 5,
+    "balance": 15000.00
+  }
+}

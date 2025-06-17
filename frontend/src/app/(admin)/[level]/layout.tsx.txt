@@ -1,0 +1,21 @@
+import { AdminLevelGuard } from '@/components/admin/LevelGuard';
+import { AdminSidebar } from '@/components/admin/Sidebar';
+
+export default function LevelLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: { level: 'high' | 'low' };
+}) {
+  return (
+    <AdminLevelGuard requiredLevel={params.level}>
+      <div className="flex">
+        <AdminSidebar level={params.level} />
+        <main className="flex-1 ml-64 p-6 bg-white rounded-lg shadow">
+          {children}
+        </main>
+      </div>
+    </AdminLevelGuard>
+  );
+}
