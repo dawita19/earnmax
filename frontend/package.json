@@ -20,7 +20,7 @@
     "docker:run": "docker run -p 3000:3000 frontend"
   },
   "dependencies": {
-    "next": "^14.0.0",
+    "next": "^15.3.3",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "axios": "^1.0.0",
